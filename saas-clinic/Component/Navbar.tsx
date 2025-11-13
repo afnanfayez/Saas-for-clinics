@@ -15,19 +15,17 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         {/* شعار الموقع */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <img src="" alt="" />
-          {/* <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--color-primary-dark)] tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--color-primary-dark)] tracking-tight">
             عيادتك
-          </h1> */}
+          </h1>
         </div>
-
-\        <button
+        \{" "}
+        <button
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden text-[var(--color-primary)] focus:outline-none"
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
-
         {/* روابط التنقل */}
         <ul
           className={`flex flex-col md:flex-row md:items-center md:space-x-8 rtl:space-x-reverse absolute md:static top-16 right-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none transition-all duration-300 ease-in-out ${
