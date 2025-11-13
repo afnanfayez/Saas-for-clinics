@@ -1,11 +1,15 @@
-import Login from "../src/Pages/Login";
-const Home =() =>{
+import Navbar from "../Component/Navbar";
+import JoinUsPage from "@/app/(auth)/joinUs/page";
+
+const Home = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-<h1>Saas For Clinics</h1>
-<Login />
-    </div>
+    <>
+      <Navbar />
+      <div className="flex min-h-screen items-center mt-7 justify-center bg-zinc-50 font-sans ">
+        <JoinUsPage />
+      </div>
+    </>
   );
-}
+};
 
 export default Home;
