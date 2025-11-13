@@ -42,6 +42,7 @@ export default function JoinUsPage() {
     const url = URL.createObjectURL(file);
     setLogoPreview(url);
   };
+  
 
   const validate = () => {
     const next: Record<string, string> = {};
@@ -54,19 +55,30 @@ export default function JoinUsPage() {
     setErrors(next);
     return Object.keys(next).length === 0;
   };
+const onSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  console.log("Clinic payload:", form);
+  alert("تم إرسال طلب الانضمام بنجاح");
 
-    // هنا تربط الـ API
-    console.log("Clinic payload:", form);
-    alert("تم إرسال طلب الانضمام بنجاح ✅");
-  };
+  setForm({
+    logo: null,
+    clinicName: "",
+    email: "",
+    phone: "",
+    city: "",
+    specialty: "",
+    website: "",
+    description: "",
+  });
 
+  setLogoPreview(null);
+
+  setErrors({});
+};
   return (
-    <div className="min-h-screen w-full bg-[#f3f7f6] flex items-center justify-center p-6">
-      {/* خلفية تجميلية بلون الهوية */}
+    <div className="min-h-screen w-full bg-[#f3f7f6] flex items-center justify-center p-6 mt-8">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="w-72 h-72 rounded-full bg-[var(--color-primary-light)] blur-3xl absolute -top-16 -left-10" />
         <div className="w-80 h-80 rounded-full bg-[var(--color-primary-light)] blur-3xl absolute bottom-10 right-10" />
