@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Button from "./Button";
 import Link from "next/link";
+import logo from "@/public/assets/photo_2025-11-13_10-59-28-removebg-preview.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,11 +16,16 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         {/* شعار الموقع */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          {/* <img
+            src="/assets/photo_2025-11-13_10-59-28-removebg-preview.png"
+            alt="شعار العيادة"
+            className="w-70 h-20 object-contain"
+          />{" "} */}
           <h1 className="text-3xl md:text-4xl font-extrabold text-[var(--color-primary-dark)] tracking-tight">
             عيادتك
           </h1>
         </div>
-        \{" "}
+
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden text-[var(--color-primary)] focus:outline-none"
@@ -35,7 +41,7 @@ const Navbar = () => {
           }`}
         >
           <li className="text-zinc-700 hover:text-[var(--color-primary-dark)] px-4 py-2 md:p-0 cursor-pointer transition">
-            <Link href="/">الرئيسية</Link>
+            <Link href="/landing">الرئيسية</Link>
           </li>
           <li className="text-zinc-700 hover:text-[var(--color-primary-dark)] px-4 py-2 md:p-0 cursor-pointer transition">
             <Link href="/about">عن العيادة</Link>
