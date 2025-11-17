@@ -181,6 +181,40 @@ export const translations = {
     qaDailyReportTitle: "View today’s incoming amounts",
     qaDailyReportDesc:
       "Total payments, paid/unpaid invoices and cash vs electronic amounts.",
+    // New patient page
+    patientsManagement: "Patients management",
+    newPatient: "New Patient",
+    newPatientSubtitle:
+      "Enter the basic patient information to create an account and send the password via SMS.",
+
+    fullNameLabel: "Full name",
+    fullNamePlaceholder: "Enter full name (first, middle, last)",
+    nationalIdLabel: "National ID",
+    nationalIdPlaceholder: "e.g. 123456789",
+    nationalIdHint: "Used to make sure the patient is not registered twice.",
+    phoneLabel: "Phone number",
+    phonePlaceholder: "e.g. 059XXXXXXXX",
+    phoneHint: "The first password will be sent to this phone number via SMS.",
+
+    clearForm: "Clear form",
+    saveAndSendPassword: "Save & send password",
+    saving: "Saving...",
+
+    newPatientTipsTitle: "Guidelines for registering a new patient",
+    newPatientTipsBody:
+      "Make sure the ID and phone number match the official documents. This data will be used to log in and to contact the patient.",
+    newPatientTip1:
+      "Avoid using abbreviations in the patient name whenever possible.",
+    newPatientTip2:
+      "Make sure the phone number is correct and includes the area prefix.",
+    newPatientTip3:
+      "Inform the patient that the password has been sent to their phone.",
+    newPatientFooter:
+      "When you save, the system automatically creates a patient account and sends a temporary password that can be changed later from the portal.",
+
+    newPatientSuccess: "Patient account created and password sent via SMS.",
+    newPatientServerError:
+      "An error occurred while creating the patient. Please try again.",
   },
   ar: {
     // Login page
@@ -359,6 +393,36 @@ export const translations = {
     qaDailyReportTitle: "إحصاء المبالغ المالية الداخلة اليوم",
     qaDailyReportDesc:
       "إجمالي المبالغ المستلمة، عدد الفواتير المدفوعة وغير المدفوعة، وإجمالي النقدي والإلكتروني.",
+    // صفحة المريض الجديد
+    patientsManagement: "إدارة المرضى",
+    newPatient: "تسجيل مريض جديد",
+    newPatientSubtitle:
+      "أدخل بيانات المريض الأساسية ليتم إنشاء حساب له وإرسال كلمة المرور تلقائياً.",
+
+    fullNameLabel: "الاسم الكامل",
+    fullNamePlaceholder: "اكتب الاسم الثلاثي أو الرباعي",
+    nationalIdLabel: "رقم الهوية",
+    nationalIdPlaceholder: "مثال: 123456789",
+    nationalIdHint: "يُستخدم للتأكد من عدم تكرار تسجيل نفس المريض.",
+    phoneLabel: "رقم الهاتف",
+    phonePlaceholder: "مثال: 059XXXXXXXX",
+    phoneHint: "سيتم إرسال كلمة المرور الأولى لهذا الرقم عبر رسالة SMS.",
+
+    clearForm: "مسح الحقول",
+    saveAndSendPassword: "حفظ وإرسال كلمة المرور",
+    saving: "جاري الحفظ...",
+
+    newPatientTipsTitle: "إرشادات تسجيل مريض جديد",
+    newPatientTipsBody:
+      "تأكّد من مطابقة بيانات الهوية ورقم الهاتف مع الوثائق الرسمية الخاصة بالمريض، لأن هذه المعلومات ستُستخدم لاحقاً في تسجيل الدخول للبوابة الإلكترونية وفي التواصل معه.",
+    newPatientTip1: "تجنّب إدخال أسماء مختصرة قدر الإمكان.",
+    newPatientTip2: "تأكد من كتابة رقم الهاتف بشكل صحيح مع المقدمة.",
+    newPatientTip3: "أبلغ المريض بأن كلمة المرور أُرسلت على هاتفه.",
+    newPatientFooter:
+      "عند حفظ البيانات، يقوم النظام تلقائياً بإنشاء حساب للمريض وإرسال كلمة مرور مؤقتة يمكنه تغييرها لاحقاً من خلال البوابة الإلكترونية.",
+
+    newPatientSuccess: "تم إنشاء حساب المريض وإرسال كلمة المرور عبر SMS.",
+    newPatientServerError: "حدث خطأ أثناء إنشاء المريض. حاول مرة أخرى.",
   },
 };
 
