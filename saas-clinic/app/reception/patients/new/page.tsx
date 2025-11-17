@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import { useRouter } from "next/navigation";
+
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function NewPatientPage() {
