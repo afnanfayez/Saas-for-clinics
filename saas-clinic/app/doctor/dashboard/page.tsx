@@ -1,77 +1,58 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { WelcomeBanner } from '@/components/dashboard/WelcomeBanner';
+import { StatsCard } from '@/components/dashboard/StatsCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Users, FileCheck } from 'lucide-react';
 
 export default function DoctorDashboard() {
-  const { user, logout, clinic, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
+  const { user, clinic } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-      </div>
-    );
-  }
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h1>
-            <p className="text-sm text-gray-600">{clinic?.name}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.role}</p>
-            </div>
-            <button onClick={logout} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+    <DashboardLayout title="Doctor Dashboard" subtitle={clinic?.name}>
+      <WelcomeBanner
+        userName={`Dr. ${user.name}`}
+        message="Welcome"
+        subtitle="Manage your patients and appointments"
+        gradient="from-purple-600 to-purple-700"
+      />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-linear-to-r from-purple-600 to-purple-700 rounded-lg p-6 text-white mb-8">
-          <h2 className="text-2xl font-bold mb-2">Welcome, Dr. {user.name}!</h2>
-          <p className="text-purple-100">Manage your patients and appointments</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <StatsCard
+          title="Today's Appointments"
+          value={12}
+          icon={Calendar}
+          iconBgColor="bg-purple-100"
+          iconColor="text-purple-600"
+        />
+        <StatsCard
+          title="Total Patients"
+          value={156}
+          icon={Users}
+          iconBgColor="bg-blue-100"
+          iconColor="text-blue-600"
+        />
+        <StatsCard
+          title="Pending Reviews"
+          value={8}
+          icon={FileCheck}
+          iconBgColor="bg-yellow-100"
+          iconColor="text-yellow-600"
+        />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm text-gray-600 mb-1">Today&apos;s Appointments</p>
-            <p className="text-3xl font-bold text-gray-900">12</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm text-gray-600 mb-1">Total Patients</p>
-            <p className="text-3xl font-bold text-gray-900">156</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm text-gray-600 mb-1">Pending Reviews</p>
-            <p className="text-3xl font-bold text-gray-900">8</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">Today&apos;s Schedule</h3>
-          </div>
-          <div className="p-6">
-            <p className="text-gray-600">Your appointments will appear here.</p>
-          </div>
-        </div>
-      </main>
-    </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Today's Schedule</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600">Your appointments will appear here.</p>
+        </CardContent>
+      </Card>
+    </DashboardLayout>
   );
 }
