@@ -215,6 +215,54 @@ export const translations = {
     newPatientSuccess: "Patient account created and password sent via SMS.",
     newPatientServerError:
       "An error occurred while creating the patient. Please try again.",
+    // Search patient
+    searchPatient: "Search for a patient",
+    searchPatientSubtitle:
+      "Search using the national ID or phone number to access the patient file.",
+    searchPatientServerError:
+      "An error occurred while searching for the patient. Please try again.",
+    searchPatientLabel: "Enter national ID or phone number to search",
+    searchPatientHint:
+      "You can search by full national ID or the phone number registered in the system.",
+    search: "Search",
+    noPatientsFound: "No patients found matching your search.",
+
+    // Appointment requests
+    appointmentRequestsTitle: "Appointment requests",
+    appointmentRequestsSubtitle:
+      "Review requests coming from the online portal, verify details, and forward them to the appropriate doctor for approval or changes.",
+    appointmentRequestsSearchPlaceholder:
+      "Search by name, national ID, phone, request number...",
+    appointmentRequestsCountLabel: "Requests count",
+    appointmentRequestsNoResults:
+      "No requests match the current search or filter.",
+
+    appointmentStatusAll: "All",
+    appointmentStatusNew: "New",
+    appointmentStatusApproved: "Approved",
+    appointmentStatusRejected: "Rejected",
+    appointmentStatusRescheduled: "Rescheduled",
+
+    appointmentDetailsTitle: "Appointment request details",
+    appointmentDetailsRequestNumber: "Request number",
+    appointmentDetailsPatientName: "Patient name",
+    appointmentDetailsNationalId: "National ID",
+    appointmentDetailsPhone: "Phone number",
+    appointmentDetailsSource: "Source",
+    appointmentDetailsSpecialty: "Specialty",
+    appointmentDetailsDoctor: "Requested doctor",
+    appointmentDetailsPreferredSlot: "Preferred appointment",
+    appointmentDetailsCurrentStatus: "Current status",
+    appointmentDetailsComplaint: "Case description / complaint",
+    appointmentDetailsDate: "Appointment date",
+    appointmentDetailsTime: "Appointment time",
+    appointmentDetailsNoteLabel:
+      "Note (will appear in the appointment file / can be sent to the patient)",
+
+    appointmentActionApprove: "Approve appointment",
+    appointmentActionReschedule: "Reschedule",
+    appointmentActionReject: "Reject request",
+    appointmentActionClose: "Cancel / Close",
   },
   ar: {
     // Login page
@@ -332,7 +380,7 @@ export const translations = {
     standard: "قياسية",
     premium: "مميزة",
     registering: "جارٍ التسجيل...",
-
+    searchPatientServerError: "حدث خطأ أثناء البحث عن المريض. حاول مرة أخرى.",
     // Demo credentials
     demoCredentials: "🔐 بيانات التجربة:",
     admin: "المدير:",
@@ -423,6 +471,57 @@ export const translations = {
 
     newPatientSuccess: "تم إنشاء حساب المريض وإرسال كلمة المرور عبر SMS.",
     newPatientServerError: "حدث خطأ أثناء إنشاء المريض. حاول مرة أخرى.",
+    // searchPatientServerError: "حدث خطأ أثناء البحث عن المريض. حاول مرة أخرى.",
+    patientsManagement: "إدارة المرضى",
+    back: "رجوع",
+
+    // البحث عن مريض
+    searchPatient: "البحث عن مريض",
+    searchPatientSubtitle:
+      "ابحث باستخدام رقم الهوية أو رقم الهاتف للوصول إلى ملف المريض.",
+    searchPatientServerError: "حدث خطأ أثناء البحث عن المريض. حاول مرة أخرى.",
+    searchPatientLabel: "أدخل رقم الهوية أو رقم الهاتف للبحث عن المريض",
+    searchPatientHint:
+      "يمكنك البحث برقم الهوية الكامل أو رقم الهاتف المسجل في النظام.",
+    search: "بحث",
+    noPatientsFound: "لا توجد أي نتائج مطابقة لبيانات البحث المدخلة.",
+
+    // طلبات المواعيد
+    appointmentRequestsTitle: "طلبات المواعيد",
+    appointmentRequestsSubtitle:
+      "مراجعة الطلبات القادمة من البوابة الإلكترونية، تدقيق التفاصيل، وتحويلها للطبيب المناسب للموافقة أو التعديل.",
+    appointmentRequestsSearchPlaceholder:
+      "بحث بالاسم، رقم الهوية، الهاتف، رقم الطلب...",
+    appointmentRequestsCountLabel: "عدد الطلبات",
+    appointmentRequestsNoResults:
+      "لا توجد طلبات مطابقة للبحث أو الفلتر الحالي.",
+
+    appointmentStatusAll: "الكل",
+    appointmentStatusNew: "جديدة",
+    appointmentStatusApproved: "مقبولة",
+    appointmentStatusRejected: "مرفوضة",
+    appointmentStatusRescheduled: "مُعاد جدولتها",
+
+    appointmentDetailsTitle: "تفاصيل طلب الموعد",
+    appointmentDetailsRequestNumber: "رقم الطلب",
+    appointmentDetailsPatientName: "اسم المريض",
+    appointmentDetailsNationalId: "رقم الهوية",
+    appointmentDetailsPhone: "رقم الهاتف",
+    appointmentDetailsSource: "مصدر الطلب",
+    appointmentDetailsSpecialty: "التخصص",
+    appointmentDetailsDoctor: "الطبيب المطلوب",
+    appointmentDetailsPreferredSlot: "الموعد المفضل",
+    appointmentDetailsCurrentStatus: "الحالة الحالية",
+    appointmentDetailsComplaint: "وصف الحالة / الشكوى",
+    appointmentDetailsDate: "تاريخ الموعد",
+    appointmentDetailsTime: "وقت الموعد",
+    appointmentDetailsNoteLabel:
+      "ملاحظة (تظهر في ملف الموعد / يمكن إرسالها للمريض)",
+
+    appointmentActionApprove: "قبول الموعد",
+    appointmentActionReschedule: "إعادة جدولة",
+    appointmentActionReject: "رفض الطلب",
+    appointmentActionClose: "إلغاء / إغلاق",
   },
 };
 
