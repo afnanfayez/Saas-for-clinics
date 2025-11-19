@@ -95,6 +95,14 @@ export const translations = {
     add: "Add",
     edit: "Edit",
     delete: "Delete",
+    searchPatient: "Search for a patient",
+    searchPatientSubtitle:
+      "Enter a national ID or phone number to see patients linked to your clinic.",
+    searchPatientLabel: "Enter the national ID or phone to start searching",
+    searchPatientHint:
+      "We automatically look up the first five patients whose ID or phone starts with what you type.",
+    sessionExpired: "Your session expired. Please login again.",
+    notAuthorized: "You are not authorized to access this section.",
 
     // Platform Dashboard
     platformDashboard: "Platform Dashboard",
@@ -409,6 +417,14 @@ export const translations = {
     add: 'إضافة',
     edit: 'تعديل',
     delete: 'حذف',
+    searchPatient: 'البحث عن مريض',
+    searchPatientSubtitle:
+      'أدخل رقم الهوية أو الهاتف لعرض المرضى المرتبطين بعيادتك.',
+    searchPatientLabel: 'أدخل رقم الهوية أو الهاتف لبدء البحث',
+    searchPatientHint:
+      'نبحث تلقائياً عن أول خمسة مرضى يطابقون البداية التي أدخلتها (هوية أو هاتف).',
+    sessionExpired: 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+    notAuthorized: 'ليست لديك صلاحية للوصول إلى هذا القسم.',
     
     // Platform Dashboard
     platformDashboard: 'لوحة تحكم المنصة',
