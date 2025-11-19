@@ -121,7 +121,7 @@ export default function NewPatientPage() {
             >
               {/* حقل الاسم */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.fullNameLabel || "الاسم الكامل"}{" "}
                   <span className="text-red-500">*</span>
                 </label>
@@ -139,7 +139,7 @@ export default function NewPatientPage() {
 
               {/* حقل رقم الهوية */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.nationalIdLabel || "رقم الهوية"}{" "}
                   <span className="text-red-500">*</span>
                 </label>
@@ -151,7 +151,7 @@ export default function NewPatientPage() {
                   placeholder={t.nationalIdPlaceholder || "مثال: 123456789"}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-500 transition"
                 />
-                <p className="mt-1 text-[11px] text-slate-500 text-right">
+                <p className={`mt-1 text-[11px] text-slate-500 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.nationalIdHint ||
                     "يُستخدم للتأكد من عدم تكرار تسجيل نفس المريض."}
                 </p>
@@ -159,7 +159,7 @@ export default function NewPatientPage() {
 
               {/* حقل رقم الهاتف */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.phoneLabel || "رقم الهاتف"}{" "}
                   <span className="text-red-500">*</span>
                 </label>
@@ -172,7 +172,7 @@ export default function NewPatientPage() {
                   placeholder={t.phonePlaceholder || "مثال: 0599123456"}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-500 transition"
                 />
-                <p className="mt-1 text-[11px] text-slate-500 text-right">
+                <p className={`mt-1 text-[11px] text-slate-500 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.phoneHint ||
                     "سيتم إرسال كلمة المرور الأولى لهذا الرقم عبر رسالة SMS."}
                 </p>
@@ -180,7 +180,7 @@ export default function NewPatientPage() {
 
               {/* حقل تاريخ الميلاد */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.dateOfBirthLabel || "تاريخ الميلاد"}{" "}
                   <span className="text-red-500">*</span>
                 </label>
@@ -196,7 +196,7 @@ export default function NewPatientPage() {
 
               {/* حقل الجنس */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.genderLabel || "الجنس"}{" "}
                   <span className="text-red-500">*</span>
                 </label>
@@ -215,7 +215,7 @@ export default function NewPatientPage() {
 
               {/* حقل العنوان */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.addressLabel || "العنوان"}{" "}
                   <span className="text-red-500">*</span>
                 </label>
@@ -231,7 +231,7 @@ export default function NewPatientPage() {
 
               {/* حقل فصيلة الدم (اختياري) */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.bloodTypeLabel || "فصيلة الدم"} ({t.optional || "اختياري"})
                 </label>
                 <input
@@ -245,7 +245,7 @@ export default function NewPatientPage() {
 
               {/* حقل الحساسية (اختياري) */}
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right">
+                <label className={`block text-sm font-medium text-slate-800 mb-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.allergiesLabel || "الحساسية"} ({t.optional || "اختياري"})
                 </label>
                 <textarea
