@@ -1,19 +1,23 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import { useRouter } from "next/navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-type Patient = {
-  id: string;
-  name: string;
+type LookupPatient = {
+  patientId: string;
   nationalId?: string;
-  phone: string;
-  dateOfBirth?: string;
-  lastVisit?: string;
+  userId?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  raw: any;
 };
+
+const MIN_IDENTIFIER_LENGTH = 3;
+const SEARCH_DEBOUNCE_MS = 250;
 
 export default function SearchPatientPage() {
   const { language } = useLanguage();
@@ -21,52 +25,203 @@ export default function SearchPatientPage() {
   const router = useRouter();
 
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Patient[]>([]);
+  const [suggestions, setSuggestions] = useState<LookupPatient[]>([]);
+  const [selectedPatient, setSelectedPatient] =
+    useState<LookupPatient | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searched, setSearched] = useState(false);
+  const [noResults, setNoResults] = useState(false);
+  const [retryable, setRetryable] = useState(false);
+  const [lookupTrigger, setLookupTrigger] = useState(0);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSearched(false);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const activeRequest = useRef<AbortController | null>(null);
 
-    if (!query.trim()) return;
+  const trimmedQuery = query.trim();
 
-    setLoading(true);
+  const adaptLookupPatient = (record: any): LookupPatient => {
+    const fallbackId =
+      record?.patient_id ??
+      record?.patientId ??
+      record?.id ??
+      record?.user?.id ??
+      record?.user_id ??
+      record?.national_id ??
+      record?.user?.phone ??
+      record?.user?.email ??
+      `patient-${Math.random().toString(36).slice(2, 9)}`;
 
-    try {
-      const res = await fetch("/api/patients/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim() }), 
-      });
+    return {
+      patientId: String(fallbackId),
+      nationalId: record?.national_id ?? record?.nationalId ?? undefined,
+      userId:
+        record?.user?.user_id ??
+        record?.user?.id ??
+        record?.user_id ??
+        undefined,
+      name: record?.user?.name ?? record?.name ?? undefined,
+      phone: record?.user?.phone ?? record?.phone ?? undefined,
+      email: record?.user?.email ?? record?.email ?? undefined,
+      raw: record,
+    };
+  };
 
-      if (!res.ok) {
-        throw new Error("Failed to search patients");
-      }
+  useEffect(() => {
+    const identifier = trimmedQuery;
 
-      const data = await res.json();
-      setResults(data.patients || []);
-      setSearched(true);
-    } catch (err) {
-      setError(
-        t.searchPatientServerError ||
-          "حدث خطأ أثناء البحث عن المريض. حاول مرة أخرى."
-      );
-    } finally {
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+      debounceTimeout.current = null;
+    }
+
+    if (activeRequest.current) {
+      activeRequest.current.abort();
+      activeRequest.current = null;
+    }
+
+    if (identifier.length < MIN_IDENTIFIER_LENGTH) {
+      setSuggestions([]);
       setLoading(false);
+      setNoResults(false);
+      setRetryable(false);
+      setError(null);
+      return;
+    }
+
+    debounceTimeout.current = setTimeout(() => {
+      const controller = new AbortController();
+      activeRequest.current = controller;
+      setLoading(true);
+      setError(null);
+      setNoResults(false);
+      setRetryable(false);
+
+      (async () => {
+        try {
+          const res = await fetch(
+            `/api/clinic/patients/lookup?identifier=${encodeURIComponent(
+              identifier
+            )}`,
+            { signal: controller.signal }
+          );
+
+          if (res.status === 401) {
+            setSuggestions([]);
+            setError(
+              t.sessionExpired ||
+                (language === "ar"
+                  ? "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى."
+                  : "Your session expired. Please login again.")
+            );
+            router.push("/login");
+            return;
+          }
+
+          if (res.status === 403) {
+            setSuggestions([]);
+            setError(
+              t.notAuthorized ||
+                (language === "ar"
+                  ? "ليست لديك صلاحية للبحث عن المرضى."
+                  : "You are not authorized to search patients.")
+            );
+            return;
+          }
+
+          if (!res.ok) {
+            setSuggestions([]);
+            setNoResults(true);
+            setRetryable(true);
+            return;
+          }
+
+          const data = await res.json();
+          const records = Array.isArray(data?.patients) ? data.patients : [];
+          const mapped = records.slice(0, 5).map(adaptLookupPatient);
+
+          setSuggestions(mapped);
+          setNoResults(mapped.length === 0);
+        } catch (fetchError) {
+          if ((fetchError as Error).name === "AbortError") {
+            return;
+          }
+          console.error("Patient lookup failed:", fetchError);
+          setSuggestions([]);
+          setNoResults(true);
+          setRetryable(true);
+        } finally {
+          setLoading(false);
+          if (activeRequest.current === controller) {
+            activeRequest.current = null;
+          }
+        }
+      })();
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = null;
+      }
+      if (activeRequest.current) {
+        activeRequest.current.abort();
+        activeRequest.current = null;
+      }
+    };
+  }, [trimmedQuery, lookupTrigger, language, router, t]);
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    setSelectedPatient(null);
+    setError(null);
+    setNoResults(false);
+    setRetryable(false);
+  };
+
+  const handleRetry = () => {
+    if (trimmedQuery.length >= MIN_IDENTIFIER_LENGTH) {
+      setLookupTrigger((prev) => prev + 1);
     }
   };
 
+  const handleSelectPatient = (patient: LookupPatient) => {
+    setSelectedPatient(patient);
+    setSuggestions([]);
+    setNoResults(false);
+    setRetryable(false);
+
+    if (patient.nationalId) {
+      setQuery(patient.nationalId);
+    } else if (patient.phone) {
+      setQuery(patient.phone);
+    } else if (patient.name) {
+      setQuery(patient.name);
+    }
+  };
+
+  const handleClear = () => {
+    setQuery("");
+    setSuggestions([]);
+    setSelectedPatient(null);
+    setError(null);
+    setNoResults(false);
+    setRetryable(false);
+  };
+
   const handleOpenPatient = (patientId: string) => {
+    if (!patientId) return;
     router.push(`/reception/patients/${patientId}`);
   };
+
+  const fallbackName =
+    language === "ar" ? "مريض بدون اسم" : "Unnamed patient";
+  const fallbackNationalId = language === "ar" ? "غير متوفر" : "N/A";
+  const fallbackPhone = language === "ar" ? "غير متوفر" : "N/A";
+  const showSuggestions = trimmedQuery.length >= MIN_IDENTIFIER_LENGTH;
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
-        {/* هيدر علوي */}
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-slate-500 mb-1">
@@ -77,7 +232,7 @@ export default function SearchPatientPage() {
             </h1>
             <p className="text-sm text-slate-500 mt-1">
               {t.searchPatientSubtitle ||
-                "ابحث باستخدام رقم الهوية أو رقم الهاتف للوصول إلى ملف المريض."}
+                "أدخل رقم الهوية أو الهاتف لعرض المرضى المرتبطين بعيادتك."}
             </p>
           </div>
 
@@ -95,45 +250,42 @@ export default function SearchPatientPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-6 md:p-7 border-b border-slate-100">
             <form
-              onSubmit={handleSearch}
-              className="flex flex-col md:flex-row gap-3 items-stretch"
+              onSubmit={(e) => e.preventDefault()}
+              className="flex flex-col gap-3"
             >
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-800 mb-1 text-right md:text-right">
-                  {t.searchPatientLabel ||
-                    "أدخل رقم الهوية أو رقم الهاتف للبحث عن المريض"}
-                </label>
+              <label className="block text-sm font-medium text-slate-800">
+                {t.searchPatientLabel || "أدخل رقم الهوية أو الهاتف لبدء البحث"}
+              </label>
+
+              <div className="relative">
                 <input
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => handleQueryChange(e.target.value)}
                   placeholder={
                     language === "ar"
-                      ? "مثال: 123456789 أو 059XXXXXXXX"
-                      : "e.g. 123456789 or 059XXXXXXXX"
+                      ? "مثال: 0599 أو 408"
+                      : "e.g. 0599 or 408"
                   }
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-500 transition"
                 />
-                <p className="mt-1 text-[11px] text-slate-500 text-right md:text-right">
-                  {t.searchPatientHint ||
-                    (language === "ar"
-                      ? "يمكنك البحث برقم الهوية الكامل أو رقم الهاتف المسجل في النظام."
-                      : "You can search by full national ID or registered phone number.")}
-                </p>
+
+                {query && (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="absolute inset-y-0 end-3 text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    {language === "ar" ? "مسح" : "Clear"}
+                  </button>
+                )}
               </div>
 
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  disabled={loading || !query.trim()}
-                  className="px-4 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm w-full md:w-auto"
-                >
-                  {loading
-                    ? language === "ar"
-                      ? "جاري البحث..."
-                      : "Searching..."
-                    : t.search || (language === "ar" ? "بحث" : "Search")}
-                </button>
-              </div>
+              <p className="text-[11px] text-slate-500">
+                {t.searchPatientHint ||
+                  (language === "ar"
+                    ? "نبحث تلقائياً عن أول خمسة مرضى يطابقون البداية التي أدخلتها (هوية أو هاتف)."
+                    : "We automatically look up the first five patients whose ID or phone starts with what you type.")}
+              </p>
             </form>
 
             {error && (
@@ -143,93 +295,138 @@ export default function SearchPatientPage() {
             )}
           </div>
 
-          <div className="p-6 md:p-7">
-            {loading && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <span className="inline-block h-4 w-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
-                <span>
-                  {language === "ar"
-                    ? "جاري جلب النتائج..."
-                    : "Loading results..."}
-                </span>
-              </div>
-            )}
-
-            {!loading && searched && results.length === 0 && (
-              <p className="text-sm text-slate-500">
-                {t.noPatientsFound ||
-                  (language === "ar"
-                    ? "لا توجد أي نتائج مطابقة لبيانات البحث المدخلة."
-                    : "No patients found matching your search.")}
+          <div className="p-6 md:p-7 space-y-6">
+            {!showSuggestions && (
+              <p className="text-xs text-slate-500">
+                {language === "ar"
+                  ? `اكتب ${MIN_IDENTIFIER_LENGTH} خانات على الأقل لبدء البحث.`
+                  : `Type at least ${MIN_IDENTIFIER_LENGTH} characters to start searching.`}
               </p>
             )}
 
-            {!loading && results.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-                  <span>
-                    {language === "ar"
-                      ? `عدد النتائج: ${results.length}`
-                      : `Results: ${results.length}`}
-                  </span>
-                  <span>
-                    {language === "ar"
-                      ? "اضغط على اسم المريض لفتح ملفه"
-                      : "Click on the patient name to open their file"}
-                  </span>
-                </div>
+            {showSuggestions && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+                {loading && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <span className="inline-block h-4 w-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+                    <span>
+                      {language === "ar"
+                        ? "جاري تحميل الاقتراحات..."
+                        : "Loading suggestions..."}
+                    </span>
+                  </div>
+                )}
 
-                <div className="divide-y divide-slate-100 border rounded-2xl border-slate-100 overflow-hidden">
-                  {results.map((patient) => (
-                    <div
-                      key={patient.id}
-                      className="px-4 md:px-5 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 hover:bg-slate-50 transition cursor-pointer"
-                      onClick={() => handleOpenPatient(patient.id)}
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {patient.name}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          {language === "ar" ? "رقم الهوية: " : "National ID: "}
-                          {patient.nationalId ||
-                            (language === "ar" ? "غير متوفر" : "N/A")}
-                          {" • "}
-                          {language === "ar" ? "الهاتف: " : "Phone: "}
-                          {patient.phone}
-                        </p>
-                        {patient.lastVisit && (
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            {language === "ar"
-                              ? `آخر زيارة: ${patient.lastVisit}`
-                              : `Last visit: ${patient.lastVisit}`}
-                          </p>
-                        )}
-                      </div>
+                {!loading && suggestions.length > 0 && (
+                  <div className="mt-3 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
+                    {suggestions.map((patient) => {
+                      const name = patient.name || fallbackName;
+                      const nationalId = patient.nationalId || fallbackNationalId;
+                      const phone = patient.phone || fallbackPhone;
 
+                      return (
+                        <button
+                          type="button"
+                          key={`${patient.patientId}-${patient.userId ?? nationalId}`}
+                          onClick={() => handleSelectPatient(patient)}
+                          className="w-full text-left px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-teal-500/70 outline-none transition"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">
+                              {name}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              {language === "ar" ? "رقم الهوية: " : "National ID: "}
+                              {nationalId}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {language === "ar" ? "الهاتف: " : "Phone: "}
+                              {phone}
+                            </p>
+                          </div>
+
+                          <span className="text-xs font-medium text-teal-700">
+                            {language === "ar" ? "اختر" : "Select"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {!loading && !error && noResults && (
+                  <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-slate-500">
+                    <span>
+                      {language === "ar"
+                        ? `لا توجد نتائج ل "${trimmedQuery}".`
+                        : `No patients found for "${trimmedQuery}".`}
+                    </span>
+                    {retryable && (
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenPatient(patient.id);
-                        }}
-                        className="text-xs px-3 py-1.5 rounded-xl border border-teal-600 text-teal-700 hover:bg-teal-50 transition"
+                        onClick={handleRetry}
+                        className="text-xs font-semibold text-teal-700 hover:underline"
                       >
-                        {language === "ar"
-                          ? "فتح الملف الطبي"
-                          : "Open medical file"}
+                        {language === "ar" ? "أعد المحاولة" : "Retry"}
                       </button>
-                    </div>
-                  ))}
+                    )}
+                  </div>
+                )}
+
+                {error && (
+                  <p className="mt-3 text-sm text-red-700">
+                    {error}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {selectedPatient && (
+              <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">
+                      {language === "ar" ? "المريض المختار" : "Selected patient"}
+                    </p>
+                    <p className="text-lg font-semibold text-slate-900">
+                      {selectedPatient.name || fallbackName}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {language === "ar" ? "رقم الهوية: " : "National ID: "}
+                      {selectedPatient.nationalId || fallbackNationalId}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {language === "ar" ? "الهاتف: " : "Phone: "}
+                      {selectedPatient.phone || fallbackPhone}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenPatient(selectedPatient.patientId)}
+                      className="px-4 py-2 rounded-xl bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      disabled={!selectedPatient.patientId}
+                    >
+                      {language === "ar" ? "فتح ملف المريض" : "Open patient file"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClear}
+                      className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-sm hover:bg-slate-50 transition"
+                    >
+                      {language === "ar" ? "إلغاء الاختيار" : "Clear selection"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
-            {!searched && !loading && (
-              <p className="text-xs text-slate-400 mt-1">
+            {!selectedPatient && !showSuggestions && (
+              <p className="text-xs text-slate-400">
                 {language === "ar"
-                  ? "ابدأ بكتابة رقم الهوية أو رقم الهاتف ثم اضغط على زر البحث لعرض النتائج."
-                  : "Start typing the national ID or phone number, then click search to see results."}
+                  ? "ابدأ بكتابة رقم الهوية أو الهاتف (٣ خانات على الأقل) لإظهار النتائج المقترحة."
+                  : "Start typing the national ID or phone (minimum 3 characters) to see suggestions."}
               </p>
             )}
           </div>
