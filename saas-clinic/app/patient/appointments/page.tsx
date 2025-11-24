@@ -6,7 +6,30 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import apiClient from "@/lib/api";
 
+// Backend appointment structure
+type BackendAppointment = {
+  appointment_id: number;
+  appointment_date: string;
+  status: string;
+  notes?: string;
+  doctor: {
+    doctor_id: number;
+    user: {
+      user_id: number;
+      name: string;
+      email: string;
+    };
+    specialization?: string;
+  };
+  clinic: {
+    clinic_id: number;
+    clinic_name: string;
+  };
+};
+
+// Frontend appointment structure
 type Appointment = {
   id: string;
   date: string;
@@ -14,6 +37,7 @@ type Appointment = {
   clinic: string;
   doctor: string;
   status: "confirmed" | "pending" | "cancelled" | "completed";
+  notes?: string;
 };
 
 export default function MyAppointmentsPage() {
@@ -23,12 +47,69 @@ export default function MyAppointmentsPage() {
   const router = useRouter();
 
   const [filter, setFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Fetch appointments from backend
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      if (!isAuthenticated || !user) return;
+
+      try {
+        setIsLoadingAppointments(true);
+        setError(null);
+        
+        const response = await apiClient.get<{ appointments: BackendAppointment[] }>(
+          "/patient/appointments"
+        );
+
+        // Map backend appointments to frontend structure
+        const mappedAppointments: Appointment[] = response.data.appointments.map(
+          (apt) => {
+            const appointmentDateTime = new Date(apt.appointment_date);
+            const date = appointmentDateTime.toISOString().split("T")[0];
+            const time = appointmentDateTime.toTimeString().slice(0, 5);
+
+            // Map backend status to frontend status
+            let status: Appointment["status"] = "pending";
+            if (apt.status === "Approved") status = "confirmed";
+            else if (apt.status === "Requested" || apt.status === "Pending Doctor Approval") status = "pending";
+            else if (apt.status === "Cancelled") status = "cancelled";
+            else if (apt.status === "Completed") status = "completed";
+
+            return {
+              id: apt.appointment_id.toString(),
+              date,
+              time,
+              clinic: apt.clinic.clinic_name,
+              doctor: apt.doctor.user.name,
+              status,
+              notes: apt.notes,
+            };
+          }
+        );
+
+        setAppointments(mappedAppointments);
+      } catch (err: any) {
+        console.error("Error fetching appointments:", err);
+        setError(
+          err.response?.data?.message || 
+          "Failed to load appointments. Please try again."
+        );
+      } finally {
+        setIsLoadingAppointments(false);
+      }
+    };
+
+    fetchAppointments();
+  }, [isAuthenticated, user]);
 
   if (isLoading || !user) {
     return (
@@ -38,33 +119,7 @@ export default function MyAppointmentsPage() {
     );
   }
 
-  // بيانات وهمية مؤقتًا
-  const allAppointments: Appointment[] = [
-    {
-      id: "1",
-      date: "2025-03-12",
-      time: "09:30",
-      clinic: language === "ar" ? "عيادة القلب" : "Cardiology Clinic",
-      doctor: language === "ar" ? "د. محمد سالم" : "Dr. Mohammed Salem",
-      status: "confirmed",
-    },
-    {
-      id: "2",
-      date: "2025-03-20",
-      time: "11:00",
-      clinic: language === "ar" ? "عيادة الباطنية" : "Internal Medicine",
-      doctor: language === "ar" ? "د. ليلى خالد" : "Dr. Layla Khaled",
-      status: "pending",
-    },
-    {
-      id: "3",
-      date: "2025-02-10",
-      time: "16:00",
-      clinic: language === "ar" ? "عيادة العيون" : "Ophthalmology",
-      doctor: language === "ar" ? "د. سناء شحادة" : "Dr. Sanaa Shahada",
-      status: "completed",
-    },
-  ];
+  const allAppointments = appointments;
 
   const now = new Date();
 
@@ -168,7 +223,21 @@ export default function MyAppointmentsPage() {
 
         
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          {filteredAppointments.length === 0 ? (
+          {isLoadingAppointments ? (
+            <div className="p-8 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            </div>
+          ) : error ? (
+            <div className="p-6">
+              <p className="text-sm text-red-600">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 text-xs text-teal-700 hover:underline"
+              >
+                {language === "ar" ? "إعادة المحاولة" : "Retry"}
+              </button>
+            </div>
+          ) : filteredAppointments.length === 0 ? (
             <div className="p-6">
               <p className="text-sm text-slate-500">
                 {language === "ar"
