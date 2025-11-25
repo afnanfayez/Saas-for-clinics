@@ -3,10 +3,14 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useRoleGuard } from '@/lib/roleGuard';
 
 export default function DoctorDashboard() {
   const { user, logout, clinic, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  
+  // Protect route - only doctors can access
+  useRoleGuard(['Doctor']);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
