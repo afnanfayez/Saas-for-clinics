@@ -6,12 +6,16 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useRoleGuard } from "@/lib/roleGuard";
 
 export default function PatientDashboard() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
+  
+  // Protect route - only patients can access
+  useRoleGuard(['Patient']);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
