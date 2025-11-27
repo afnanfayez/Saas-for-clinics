@@ -11,7 +11,6 @@ export const useStaff = (token: string | null) => {
   const [search, setSearch] = useState<string>("");
   const [filterRole, setFilterRole] = useState<"All" | "Doctor" | "Secretary">("All");
 
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
@@ -33,12 +32,24 @@ export const useStaff = (token: string | null) => {
 
     try {
       const data = await getStaffList(token);
-      console.log("Fetched staff:", data); 
+      console.log("Fetched staff:", data);
+
       if (!Array.isArray(data)) {
         setError("Invalid staff data received from server");
         setStaffList([]);
       } else {
-        setStaffList(data);
+        // ===== احسب حالة النشاط حسب اليوم =====
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }); // Monday, Tuesday, ...
+        const staffWithStatus = data.map(staff => {
+          if (staff.role === 'Doctor') {
+            const days = staff.available_days
+              ? staff.available_days.split(',').map(d => d.trim())
+              : [];
+            return { ...staff, isActive: days.includes(today) };
+          }
+          return staff;
+        });
+        setStaffList(staffWithStatus);
       }
     } catch (err: any) {
       console.error("Fetch Staff Error:", err.response?.data || err.message);
@@ -91,7 +102,7 @@ export const useStaff = (token: string | null) => {
 
     try {
       await updateStaff(updated, token);
-      await fetchStaff(); 
+      await fetchStaff();
       setIsEditModalOpen(false);
       setEditingStaff(null);
     } catch (err: any) {
@@ -114,7 +125,7 @@ export const useStaff = (token: string | null) => {
 
     try {
       await deleteStaff(staffToDelete.user_id, token);
-      await fetchStaff(); 
+      await fetchStaff();
       setIsDeleteModalOpen(false);
       setStaffToDelete(null);
     } catch (err: any) {

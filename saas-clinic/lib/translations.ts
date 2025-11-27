@@ -202,6 +202,8 @@ export const translations = {
     deleteConfirmationMessage: "Are you sure you want to delete this staff member? This action cannot be undone.",
     btnCancel: "Cancel",
     btnSave: "Save Changes",
+    statusActive: 'Active',
+    statusInactive: 'Inactive',
 
     // Join Us page
     joinTitle: "Join Palestine Clinics SaaS",
@@ -588,7 +590,8 @@ export const translations = {
     deleteConfirmationMessage: "هل أنت متأكد أنك تريد حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.",
     btnCancel: "إلغاء",
     btnSave: "حفظ التغييرات",
-
+ statusActive: 'نشط',
+    statusInactive: 'غير نشط',
 
     joinTitle: "انضم إلى منصة عيادات فلسطين",
     joinSubtitle: "سجل عيادتك وابدأ في إدارة الرعاية الصحية بكفاءة",

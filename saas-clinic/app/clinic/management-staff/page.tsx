@@ -187,14 +187,24 @@ export default function StaffManagementPage() {
                         {staff.role === 'Doctor' ? staff.available_days || '-' : '-----'}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${staff.status === 'Active'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-red-50 text-red-700'
-                          }`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${staff.status === 'Active' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                          {staff.status}
-                        </span>
-                      </td>
+  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${staff.role === 'Doctor'
+    ? (staff.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700')
+    : (staff.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700')
+    }`}>
+    <span className={`h-1.5 w-1.5 rounded-full ${staff.role === 'Doctor'
+      ? (staff.isActive ? 'bg-green-500' : 'bg-red-500')
+      : (staff.status === 'Active' ? 'bg-green-500' : 'bg-red-500')
+    }`}></span>
+    {staff.role === 'Doctor'
+      ? (staff.isActive ? t.statusActive || 'Active' : t.statusInactive || 'Inactive')
+      : staff.status === 'Active'
+        ? t.statusActive || 'Active'
+        : t.statusInactive || 'Inactive'
+    }
+  </span>
+</td>
+
+
                       <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium flex gap-2 justify-end">
                         <button onClick={() => handleEditClick(staff)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Edit">
                           <PencilSquareIcon className="h-4 w-4" />
