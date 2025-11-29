@@ -23,7 +23,7 @@ export function AppointmentFilters({
         <select
           value={statusFilter}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="border rounded-md px-2 text-black py-1 text-sm"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
         >
           <option value="all">All</option>
           <option value="approved">Approved</option>
@@ -43,7 +43,7 @@ export function AppointmentFilters({
           type="date"
           value={dateFilter}
           onChange={(e) => onDateChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm text-black"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
         />
       </div>
 
@@ -55,7 +55,7 @@ export function AppointmentFilters({
           placeholder="Patient, phone, service..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm w-40 md:w-52 text-black"
+          className="w-full md:w-64 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 placeholder:text-slate-400"
         />
       </div>
     </div>

@@ -142,19 +142,19 @@ export function AppointmentTable({
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       <button
                         onClick={() => onApprove(appt.id)}
-                        className="px-3 py-1 text-xs rounded-full bg-emerald-600 text-white hover:bg-emerald-700"
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       >
                         {isArabic ? "موافقة" : "Approve"}
                       </button>
                       <button
                         onClick={() => openRejectModal(appt.id)}
-                        className="px-3 py-1 text-xs rounded-full bg-red-600 text-white hover:bg-red-700"
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500/20"
                       >
                         {isArabic ? "رفض" : "Reject"}
                       </button>
                       <button
                         onClick={() => openRescheduleModal(appt.id)}
-                        className="px-3 py-1 text-xs rounded-full bg-yellow-500 text-white hover:bg-yellow-600"
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-yellow-500/20"
                       >
                         {isArabic ? "إعادة جدولة" : "Reschedule"}
                       </button>
@@ -188,7 +188,7 @@ export function AppointmentTable({
                 : "Write the reason that will be sent to the patient or saved in the record."}
             </p>
             <textarea
-              className="w-full border rounded-md text-sm p-2 text-black min-h-[80px] mb-4"
+              className="w-full border border-slate-200 rounded-lg text-sm p-3 text-slate-700 min-h-[100px] mb-4 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 resize-none"
               placeholder={
                 isArabic
                   ? "اكتب سبب الرفض هنا..."
@@ -200,13 +200,13 @@ export function AppointmentTable({
             <div className="flex justify-end gap-2">
               <button
                 onClick={closeRejectModal}
-                className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
               >
                 {isArabic ? "إلغاء" : "Cancel"}
               </button>
               <button
                 onClick={handleConfirmReject}
-                className="px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                className="px-4 py-2 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500/20"
                 disabled={!rejectReason.trim()}
               >
                 {isArabic ? "تأكيد الرفض" : "Confirm rejection"}
@@ -230,20 +230,20 @@ export function AppointmentTable({
             </p>
             <input
               type="datetime-local"
-              className="w-full border rounded-md text-sm p-2 mb-4 text-black"
+              className="w-full border border-slate-200 rounded-lg text-sm p-3 mb-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all duration-200"
               value={rescheduleDateTime}
               onChange={(e) => setRescheduleDateTime(e.target.value)}
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={closeRescheduleModal}
-                className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
               >
                 {isArabic ? "إلغاء" : "Cancel"}
               </button>
               <button
                 onClick={handleConfirmReschedule}
-                className="px-3 py-1.5 text-xs rounded bg-yellow-600 text-white hover:bg-yellow-700 disabled:opacity-60"
+                className="px-4 py-2 text-xs font-medium rounded-lg bg-yellow-600 text-white hover:bg-yellow-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-yellow-500/20"
                 disabled={!rescheduleDateTime}
               >
                 {isArabic ? "تأكيد" : "Confirm"}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import toast from "react-hot-toast";
 import type { Appointment } from "@/types/appointment";
 import { AppointmentFilters } from "@/components/doctor/AppointmentFilters";
 import { AppointmentTable } from "@/components/doctor/AppointmentTable";
@@ -48,50 +49,58 @@ export default function DoctorAppointmentsPage() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
+  const hasLoaded = useRef(false);
+
+  const fetchAppointments = useCallback(async () => {
     if (!user || !token) return;
 
-    const fetchAppointments = async () => {
-      try {
+    try {
+      // Only show loading spinner on first load
+      if (!hasLoaded.current) {
         setIsLoadingAppointments(true);
-        setAppointmentsError(null);
-
-        const res = await fetch("/api/doctor/appointments", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-          const errorData = json as ApiError;
-          throw new Error(
-            errorData.message ||
-              errorData.error ||
-              (isArabic
-                ? "فشل في جلب المواعيد"
-                : "Failed to fetch appointments")
-          );
-        }
-
-        const data = json as AppointmentsResponse;
-        setAppointments(data.appointments);
-      } catch (err: unknown) {
-        console.error("Error fetching appointments:", err);
-        let message = isArabic
-          ? "فشل في جلب المواعيد"
-          : "Failed to fetch appointments";
-        if (err instanceof Error) message = err.message;
-        setAppointmentsError(message);
-      } finally {
-        setIsLoadingAppointments(false);
       }
-    };
+      
+      setAppointmentsError(null);
 
-    fetchAppointments();
+      const res = await fetch("/api/doctor/appointments", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        const errorData = json as ApiError;
+        throw new Error(
+          errorData.message ||
+            errorData.error ||
+            (isArabic
+              ? "فشل في جلب المواعيد"
+              : "Failed to fetch appointments")
+        );
+      }
+
+      const data = json as AppointmentsResponse;
+      setAppointments(data.appointments);
+      hasLoaded.current = true;
+    } catch (err: unknown) {
+      console.error("Error fetching appointments:", err);
+      let message = isArabic
+        ? "فشل في جلب المواعيد"
+        : "Failed to fetch appointments";
+      if (err instanceof Error) message = err.message;
+      setAppointmentsError(message);
+      toast.error(message);
+    } finally {
+      setIsLoadingAppointments(false);
+    }
   }, [user, token, isArabic]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   const handleApprove = async (appointmentId: number) => {
     if (!token) {
@@ -124,13 +133,17 @@ export default function DoctorAppointmentsPage() {
           a.id === appointmentId ? { ...a, status: "approved" } : a
         )
       );
+      
+      toast.success(isArabic ? "تم قبول الموعد بنجاح" : "Appointment approved successfully");
+      fetchAppointments(); // Background refresh
+
     } catch (err: unknown) {
       console.error("Error approving appointment:", err);
       let message = isArabic
         ? "فشل في قبول الموعد"
         : "Failed to approve appointment";
       if (err instanceof Error) message = err.message;
-      alert(message);
+      toast.error(message);
     }
   };
 
@@ -168,9 +181,12 @@ export default function DoctorAppointmentsPage() {
       console.log("Appointment rejected", data);
 
       setAppointments((prev) => prev.filter((a) => a.id !== appointmentId));
+      toast.success(isArabic ? "تم رفض الموعد بنجاح" : "Appointment rejected successfully");
+      fetchAppointments(); // Background refresh
+
     } catch (err) {
       console.error("Error rejecting appointment:", err);
-      alert(
+      toast.error(
         err instanceof Error
           ? err.message
           : isArabic
@@ -230,6 +246,10 @@ export default function DoctorAppointmentsPage() {
             : a
         )
       );
+      
+      toast.success(isArabic ? "تم إعادة جدولة الموعد بنجاح" : "Appointment rescheduled successfully");
+      fetchAppointments(); // Background refresh
+
     } catch (err: unknown) {
       console.error("Error rescheduling appointment:", err);
 
@@ -241,6 +261,7 @@ export default function DoctorAppointmentsPage() {
           : "Error rescheduling appointment";
 
       console.log(message);
+      toast.error(message);
     }
   };
 

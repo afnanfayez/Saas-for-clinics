@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
 const data = await res.json();
 
-console.log("RAW API /doctor/appointments =>", data); // <== مهم
+
 
 if (!res.ok) {
   return NextResponse.json(
@@ -42,7 +42,7 @@ const mapped: Appointment[] = (data.appointments as ApiAppointment[]).map(
   mapAppointmentFromApi
 );
 
-console.log("MAPPED appointments =>", mapped); // <== كمان مهم
+
 
 return NextResponse.json({ appointments: mapped }, { status: 200 });
     }
