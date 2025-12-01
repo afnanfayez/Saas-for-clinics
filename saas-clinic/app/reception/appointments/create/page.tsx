@@ -86,8 +86,7 @@ export default function CreateAppointmentPage() {
     setNotes("");
   };
 
-  // Previous visits will be fetched from API in production
-  const previousVisits: Visit[] = [];
+
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
@@ -183,7 +182,10 @@ export default function CreateAppointmentPage() {
                 </p>
               </div>
 
-              <PreviousVisits visits={previousVisits} showSummary={true} />
+              <PreviousVisits 
+                patientId={selectedPatient.patientId} 
+                showSummary={true} 
+              />
             </div>
           )}
         </div>

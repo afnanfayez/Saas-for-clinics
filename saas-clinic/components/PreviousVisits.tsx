@@ -3,20 +3,20 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
-// import { getPatientMedicalHistory, getMyMedicalHistory } from "@/app/api/medicalHistory";
+import { 
+  getPatientMedicalHistory, 
+  getMyMedicalHistory,
+  type Visit 
+} from "@/app/api/medicalHistory";
 
-export type Visit = {
-  date: string;
-  clinic: string;
-  diagnosis: string;
-  doctor: string;
-};
+// Re-export Visit type for backward compatibility
+export type { Visit };
 
 interface PreviousVisitsProps {
   visits?: Visit[];
   showSummary?: boolean;
   className?: string;
-  patientId?: number;
+  patientId?: number | string;
 }
 
 export default function PreviousVisits({
@@ -46,7 +46,7 @@ export default function PreviousVisits({
       try {
         let data: Visit[] = [];
         if (patientId) {
-          data = await getPatientMedicalHistory(patientId, token);
+          data = await getPatientMedicalHistory(Number(patientId), token);
         } else if (user?.role === 'Patient') {
           data = await getMyMedicalHistory(token);
         }
