@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import apiClient from "@/lib/api";
+import PageHeader from "@/components/common/PageHeader";
 
 interface Doctor {
   doctor_id: number;
@@ -26,6 +28,7 @@ export default function NewAppointmentPage() {
     time: "",
     doctor_id: "",
   });
+
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -38,20 +41,20 @@ export default function NewAppointmentPage() {
       try {
         const response = await fetch("/api/doctors");
         const data = await response.json();
-        
+
         if (response.ok) {
           setDoctors(data.doctors || []);
         } else {
           setError(data.message || "Failed to load doctors");
         }
-      } catch (err) {
+      } catch {
         setError("Failed to load doctors");
       } finally {
         setLoadingDoctors(false);
       }
     };
 
-    if (user && user.role === 'Patient') {
+    if (user && user.role === "Patient") {
       fetchDoctors();
     }
   }, [user]);
@@ -76,18 +79,14 @@ export default function NewAppointmentPage() {
     setMessage(null);
 
     if (!form.date || !form.time || !form.doctor_id) {
-      setError(
-        language === "ar"
-          ? "يرجى تعبئة جميع الحقول المطلوبة."
-          : "Please fill all required fields."
-      );
+      setError(language === "ar" ? "يرجى تعبئة جميع الحقول المطلوبة." : "Please fill all required fields.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // Combine date and time into ISO format
+      // Combine date + time ISO format
       const appointmentDateTime = new Date(`${form.date}T${form.time}`).toISOString();
 
       const response = await fetch("/api/appointments", {
@@ -104,8 +103,8 @@ export default function NewAppointmentPage() {
 
       if (!response.ok) {
         if (data.errors) {
-          const errorMessages = Object.values(data.errors).flat().join(', ');
-          setError(errorMessages as string);
+          const errorMessages = Object.values(data.errors).flat().join(", ");
+          setError(errorMessages);
         } else {
           setError(data.message || "Failed to create appointment");
         }
@@ -119,54 +118,47 @@ export default function NewAppointmentPage() {
       );
 
       setForm({ date: "", time: "", doctor_id: "" });
-    } catch {
+
+      setTimeout(() => {
+        router.push("/patient/appointments");
+      }, 2000);
+    } catch (err: unknown) {
+      console.error("Error creating appointment:", err);
+
+      const axiosError = err as { response?: { data?: { message?: string } } };
+
       setError(
-        language === "ar"
-          ? "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى."
-          : "An error occurred while submitting the request. Please try again."
+        axiosError.response?.data?.message ||
+          (language === "ar"
+            ? "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى."
+            : "An error occurred while submitting the request. Please try again.")
       );
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        {/* هيدر علوي */}
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs text-slate-500 mb-1">
-              {language === "ar" ? "حجز المواعيد" : "Appointment booking"}
-            </p>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {language === "ar" ? "طلب موعد جديد" : "Request new appointment"}
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              {language === "ar"
-                ? "اختر التاريخ، الوقت، الطبيب والعيادة لطلب موعد جديد. سيتم مراجعة طلبك من المستشفى."
-                : "Select the date, time, doctor and clinic to request a new appointment. Your request will be reviewed by the clinic."}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <button
-              onClick={() => router.back()}
-              className="text-sm text-teal-700 hover:text-teal-800 hover:underline"
-            >
-              {language === "ar" ? "رجوع" : t.back || "Back"}
-            </button>
-          </div>
-        </div>
 
-        {/* الفورم */}
+        <PageHeader
+          label={language === "ar" ? "طلب جديد" : "New Appointment"}
+          title={language === "ar" ? "طلب موعد جديد" : "New Appointment"}
+          description={
+            language === "ar"
+              ? "طلب موعد جديد وإعطاؤك التفاصيل اللازمة"
+              : "View and manage your current and upcoming appointments."
+          }
+          extraActions={<LanguageSwitcher />}
+          backAction={() => router.push("/patient/dashboard")}
+          wrapperClass="border-b"
+        />
+
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <form
-            onSubmit={handleSubmit}
-            className="p-6 md:p-7 space-y-4 border-slate-100"
-          >
-            {/* التاريخ */}
+          <form onSubmit={handleSubmit} className="p-6 md:p-7 space-y-4 border-slate-100">
+
+            {/* Date */}
             <div>
               <label className="block text-sm font-medium text-slate-800 mb-1">
                 {language === "ar" ? "تاريخ الموعد" : "Appointment date"}{" "}
@@ -177,11 +169,12 @@ export default function NewAppointmentPage() {
                 name="date"
                 value={form.date}
                 onChange={handleChange}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-500 transition"
+                min={new Date().toISOString().split("T")[0]}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 text-sm"
               />
             </div>
 
-            {/* الوقت */}
+            {/* Time */}
             <div>
               <label className="block text-sm font-medium text-slate-800 mb-1">
                 {language === "ar" ? "وقت الموعد" : "Appointment time"}{" "}
@@ -192,12 +185,11 @@ export default function NewAppointmentPage() {
                 name="time"
                 value={form.time}
                 onChange={handleChange}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-500 transition"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 text-sm"
               />
             </div>
 
-
-            {/* الطبيب */}
+            {/* Doctor */}
             <div>
               <label className="block text-sm font-medium text-slate-800 mb-1">
                 {language === "ar" ? "الطبيب" : "Doctor"}{" "}
@@ -208,24 +200,29 @@ export default function NewAppointmentPage() {
                 value={form.doctor_id}
                 onChange={handleChange}
                 disabled={loadingDoctors}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-500 transition disabled:opacity-50"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 text-sm disabled:opacity-50"
               >
                 <option value="">
                   {loadingDoctors
-                    ? language === "ar" ? "جاري التحميل..." : "Loading..."
-                    : language === "ar" ? "اختر الطبيب" : "Select a doctor"}
+                    ? language === "ar"
+                      ? "جاري تحميل الأطباء..."
+                      : "Loading doctors..."
+                    : language === "ar"
+                    ? "اختر الطبيب"
+                    : "Select a doctor"}
                 </option>
+
                 {doctors.map((doctor) => (
                   <option key={doctor.doctor_id} value={doctor.doctor_id}>
-                    {doctor.name} {doctor.specialization && `- ${doctor.specialization}`}
+                    {doctor.name}
+                    {doctor.specialization ? ` - ${doctor.specialization}` : ""}
                   </option>
                 ))}
               </select>
-              {doctors.length === 0 && !loadingDoctors && (
+
+              {!loadingDoctors && doctors.length === 0 && (
                 <p className="mt-1 text-xs text-amber-600">
-                  {language === "ar"
-                    ? "لا يوجد أطباء متاحون حالياً"
-                    : "No doctors available"}
+                  {language === "ar" ? "لا يوجد أطباء متاحون حالياً" : "No doctors available"}
                 </p>
               )}
             </div>
@@ -235,27 +232,27 @@ export default function NewAppointmentPage() {
                 {message}
               </p>
             )}
+
             {error && (
               <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
                 {error}
               </p>
             )}
 
-            {/* أزرار */}
+            {/* Buttons */}
             <div className="pt-2 flex items-center justify-end gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  setForm({ date: "", time: "", doctor_id: "" })
-                }
+                onClick={() => setForm({ date: "", time: "", doctor_id: "" })}
                 className="px-3 py-2 text-sm rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
                 {language === "ar" ? "مسح الحقول" : "Clear"}
               </button>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="px-4 py-2.5 bg-teal-600 text-white text-sm rounded-xl hover:bg-teal-700 disabled:opacity-50"
               >
                 {loading
                   ? language === "ar"
@@ -266,6 +263,7 @@ export default function NewAppointmentPage() {
                   : "Submit request"}
               </button>
             </div>
+
           </form>
         </div>
       </div>

@@ -1,5 +1,3 @@
-// src/components/doctor/AppointmentFilters.tsx
-
 interface AppointmentFiltersProps {
   statusFilter: string;
   dateFilter: string;
@@ -19,21 +17,24 @@ export function AppointmentFilters({
 }: AppointmentFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
+      {/* Status Filter */}
       <div>
         <label className="block text-xs text-gray-500 mb-1">Status</label>
         <select
           value={statusFilter}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="border rounded-md px-2 text-black py-1 text-sm"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
         >
           <option value="all">All</option>
-          <option value="requested">Requested</option>
           <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="rescheduled">Rescheduled</option>
           <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="canceled">Cancelled</option>
         </select>
       </div>
 
+      {/* Date Filter */}
       <div>
         <label className="block text-xs text-gray-500 mb-1 text-black">
           Date
@@ -42,10 +43,11 @@ export function AppointmentFilters({
           type="date"
           value={dateFilter}
           onChange={(e) => onDateChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm text-black"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
         />
       </div>
 
+      {/* Search Filter */}
       <div>
         <label className="block text-xs text-gray-500 mb-1">Search</label>
         <input
@@ -53,7 +55,7 @@ export function AppointmentFilters({
           placeholder="Patient, phone, service..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm w-40 md:w-52 text-black"
+          className="w-full md:w-64 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 placeholder:text-slate-400"
         />
       </div>
     </div>
