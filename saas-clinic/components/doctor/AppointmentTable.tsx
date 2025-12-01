@@ -1,11 +1,20 @@
 // src/components/doctor/AppointmentTable.tsx
-import { Appointment } from "@/types/appointment";
+
+import { useState } from "react";
+import type { Appointment } from "@/types/appointment";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AppointmentTableProps {
   appointments: Appointment[];
   isLoading: boolean;
   error: string | null;
-  onApprove?: (id: number) => void;
+  onApprove: (id: number) => void;
+  onReject: (id: number, reason: string) => void;
+  onReschedule: (
+    id: number,
+    appointment_date: string,
+    appointment_time: string
+  ) => void;
 }
 
 export function AppointmentTable({
@@ -13,140 +22,236 @@ export function AppointmentTable({
   isLoading,
   error,
   onApprove,
+  onReject,
+  onReschedule,
 }: AppointmentTableProps) {
-  if (isLoading) {
+  const { language } = useLanguage();
+  const isArabic = language === "ar";
+
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [rescheduleDateTime, setRescheduleDateTime] = useState("");
+  const [rescheduleId, setRescheduleId] = useState<number | null>(null);
+
+  const openRejectModal = (id: number) => {
+    setSelectedId(id);
+    setRejectReason("");
+    setIsRejectOpen(true);
+  };
+
+  const closeRejectModal = () => {
+    setSelectedId(null);
+    setRejectReason("");
+    setIsRejectOpen(false);
+  };
+
+  const handleConfirmReject = () => {
+    if (!selectedId) return;
+    onReject(selectedId, rejectReason.trim());
+    closeRejectModal();
+  };
+
+  const openRescheduleModal = (id: number) => {
+    setRescheduleId(id);
+    setRescheduleDateTime("");
+    setIsRescheduleOpen(true);
+  };
+
+  const closeRescheduleModal = () => {
+    setRescheduleId(null);
+    setRescheduleDateTime("");
+    setIsRescheduleOpen(false);
+  };
+
+  const handleConfirmReschedule = () => {
+    if (!rescheduleId || !rescheduleDateTime) return;
+
+    const dt = new Date(rescheduleDateTime);
+
+    const appointment_date = dt.toISOString().split("T")[0];
+
+    const hours = dt.getHours().toString().padStart(2, "0");
+    const minutes = dt.getMinutes().toString().padStart(2, "0");
+
+    const appointment_time = `${hours}:${minutes}`;
+
+    onReschedule(rescheduleId, appointment_date, appointment_time);
+    closeRescheduleModal();
+  };
+
+  if (isLoading)
     return (
-      <div className="flex justify-center items-center py-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      <div className="text-sm text-gray-600">
+        {isArabic ? "جاري تحميل المواعيد..." : "Loading appointments..."}
       </div>
     );
-  }
 
-  if (error) {
-    return <p className="text-sm text-red-600">{error}</p>;
-  }
+  if (error) return <div className="text-red-600 text-sm">{error}</div>;
 
-  if (appointments.length === 0) {
+  if (!appointments.length)
     return (
-      <p className="text-sm text-gray-500">
-        No appointment requests found for the selected filters.
-      </p>
+      <div className="text-sm text-gray-500">
+        {isArabic ? "لا توجد مواعيد." : "No appointments found."}
+      </div>
     );
-  }
-
-  const formatDate = (iso: string) => new Date(iso).toLocaleDateString();
-  const formatTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-  const statusLabel = (status: string) => {
-    switch (status) {
-      case "requested":
-        return "Requested";
-      case "approved":
-        return "Approved";
-      case "completed":
-        return "Completed";
-      case "cancelled":
-        return "Cancelled";
-      default:
-        return status;
-    }
-  };
-
-  const statusClass = (status: string) => {
-    switch (status) {
-      case "requested":
-        return "bg-yellow-100 text-yellow-800";
-      case "approved":
-        return "bg-emerald-100 text-emerald-800";
-      case "completed":
-        return "bg-blue-100 text-blue-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-sm">
-        <thead>
-          <tr className="border-b bg-gray-50">
-            <th className="px-3 py-2 text-left font-medium text-gray-600">
-              Patient
-            </th>
-            <th className="px-3 py-2 text-left font-medium text-gray-600">
-              Clinic
-            </th>
-            <th className="px-3 py-2 text-left font-medium text-gray-600">
-              Date
-            </th>
-            <th className="px-3 py-2 text-left font-medium text-gray-600">
-              Time
-            </th>
-            <th className="px-3 py-2 text-left font-medium text-gray-600">
-              Status
-            </th>
-            <th className="px-3 py-2 text-left font-medium text-gray-600">
-              Notes
-            </th>
-            <th className="px-3 py-2 text-right font-medium text-gray-600">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {appointments.map((appt) => (
-            <tr key={appt.id} className="hover:bg-gray-50">
-              <td className="px-3 py-2">
-                <div className="font-medium text-gray-900">
-                  {appt.patientName}
-                </div>
-                {appt.patientPhone && (
-                  <div className="text-xs text-gray-500">
-                    {appt.patientPhone}
-                  </div>
-                )}
-              </td>
-              <td className="px-3 py-2 text-gray-700">
-                {appt.clinicName || "-"}
-              </td>
-              <td className="px-3 py-2 text-gray-700">
-                {formatDate(appt.dateTime)}
-              </td>
-              <td className="px-3 py-2 text-gray-700">
-                {formatTime(appt.dateTime)}
-              </td>
-              <td className="px-3 py-2">
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusClass(
-                    appt.status
-                  )}`}
-                >
-                  {statusLabel(appt.status)}
-                </span>
-              </td>
-              <td className="px-3 py-2 text-gray-700 max-w-xs truncate">
-                {appt.notes || "-"}
-              </td>
-              <td className="px-3 py-2 text-right space-x-2">
-                {appt.status === "requested" && onApprove && (
-                  <button
-                    onClick={() => onApprove(appt.id)}
-                    className="px-3 py-1 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700"
-                  >
-                    Approve
-                  </button>
-                )}
-              </td>
+    <>
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="min-w-full text-sm text-black">
+          <thead className="bg-slate-50">
+            <tr className="border-b">
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+                {isArabic ? "المريض" : "Patient"}
+              </th>
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+                {isArabic ? "التاريخ والوقت" : "Date & Time"}
+              </th>
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+                {isArabic ? "الحالة" : "Status"}
+              </th>
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+                {isArabic ? "الإجراءات" : "Actions"}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {appointments.map((appt) => (
+              <tr key={appt.id} className="border-b last:border-0">
+                <td className="py-3 px-3 align-middle text-center">
+                  <div className="font-medium">{appt.patientName}</div>
+                  <div className="text-xs text-gray-500">
+                    {appt.patientPhone ?? ""}
+                  </div>
+                </td>
+                <td className="py-3 px-3 align-middle text-center">
+                  {appt.dateTime
+                    ? new Date(appt.dateTime).toLocaleString(
+                      
+                      )
+                    : "-"}
+                </td>
+                <td className="py-3 px-3 align-middle text-center capitalize">
+                  {appt.status}
+                </td>
+                <td className="py-3 px-3 align-middle">
+                  {appt.status === "requested" ? (
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <button
+                        onClick={() => onApprove(appt.id)}
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      >
+                        {isArabic ? "موافقة" : "Approve"}
+                      </button>
+                      <button
+                        onClick={() => openRejectModal(appt.id)}
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                      >
+                        {isArabic ? "رفض" : "Reject"}
+                      </button>
+                      <button
+                        onClick={() => openRescheduleModal(appt.id)}
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-yellow-500/20"
+                      >
+                        {isArabic ? "إعادة جدولة" : "Reschedule"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center">
+                      <span className="text-xs text-gray-500">
+                        {isArabic
+                          ? "لا توجد إجراءات على هذه الحالة."
+                          : "No actions for this status."}
+                      </span>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Reject Modal */}
+      {isRejectOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
+            <h2 className="text-lg font-semibold mb-3 text-gray-900">
+              {isArabic ? "سبب رفض الموعد" : "Appointment rejection reason"}
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">
+              {isArabic
+                ? "اكتب السبب الذي سيتم إرساله للمريض أو حفظه في السجل."
+                : "Write the reason that will be sent to the patient or saved in the record."}
+            </p>
+            <textarea
+              className="w-full border border-slate-200 rounded-lg text-sm p-3 text-slate-700 min-h-[100px] mb-4 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 resize-none"
+              placeholder={
+                isArabic
+                  ? "اكتب سبب الرفض هنا..."
+                  : "Write the rejection reason here..."
+              }
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeRejectModal}
+                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
+              >
+                {isArabic ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                className="px-4 py-2 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                disabled={!rejectReason.trim()}
+              >
+                {isArabic ? "تأكيد الرفض" : "Confirm rejection"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {isRescheduleOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
+            <h2 className="text-lg font-semibold mb-3 text-gray-900">
+              {isArabic ? "إعادة جدولة الموعد" : "Reschedule appointment"}
+            </h2>
+            <p className="text-xs text-gray-500 mb-2">
+              {isArabic
+                ? "اختر تاريخ ووقت جديدين لهذا الموعد."
+                : "Choose a new date and time for this appointment."}
+            </p>
+            <input
+              type="datetime-local"
+              className="w-full border border-slate-200 rounded-lg text-sm p-3 mb-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all duration-200"
+              value={rescheduleDateTime}
+              onChange={(e) => setRescheduleDateTime(e.target.value)}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeRescheduleModal}
+                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
+              >
+                {isArabic ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                onClick={handleConfirmReschedule}
+                className="px-4 py-2 text-xs font-medium rounded-lg bg-yellow-600 text-white hover:bg-yellow-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-yellow-500/20"
+                disabled={!rescheduleDateTime}
+              >
+                {isArabic ? "تأكيد" : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
