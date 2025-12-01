@@ -5,9 +5,9 @@ import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import { useRouter } from "next/navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import AppointmentForm from "@/components/AppointmentsForm";
+import AppointmentForm, { type AppointmentFormData } from "@/components/AppointmentsForm";
 import PatientSearch, { LookupPatient } from "@/components/PatientSearch";
-import PreviousVisits, { Visit } from "@/components/PreviousVisits";
+import PreviousVisits from "@/components/PreviousVisits";
 
 export default function CreateAppointmentPage() {
   const { language } = useLanguage();
@@ -15,21 +15,13 @@ export default function CreateAppointmentPage() {
   const router = useRouter();
 
   const [selectedPatient, setSelectedPatient] = useState<LookupPatient | null>(null);
-  const [appointmentDate, setAppointmentDate] = useState("");
-  const [appointmentTime, setAppointmentTime] = useState("");
-  const [doctor, setDoctor] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [complaint, setComplaint] = useState("");
-  const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePatientSelect = (patient: LookupPatient) => {
     setSelectedPatient(patient);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleFormSubmit = async (data: AppointmentFormData) => {
     if (!selectedPatient) {
       alert(language === "ar" ? "يرجى اختيار مريض أولاً" : "Please select a patient first");
       return;
@@ -45,12 +37,10 @@ export default function CreateAppointmentPage() {
         },
         body: JSON.stringify({
           patientId: selectedPatient.patientId,
-          date: appointmentDate,
-          time: appointmentTime,
-          doctor,
-          specialty,
-          complaint,
-          notes,
+          doctorId: data.doctorId,
+          date: data.appointmentDate,
+          time: data.appointmentTime,
+          notes: data.notes,
         }),
       });
 
@@ -78,14 +68,7 @@ export default function CreateAppointmentPage() {
 
   const handleClearForm = () => {
     setSelectedPatient(null);
-    setAppointmentDate("");
-    setAppointmentTime("");
-    setDoctor("");
-    setSpecialty("");
-    setComplaint("");
-    setNotes("");
   };
-
 
 
   return (
@@ -206,18 +189,8 @@ export default function CreateAppointmentPage() {
 
             <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
               <AppointmentForm
-                initialDoctor={doctor}
-                initialDate={appointmentDate}
-                initialTime={appointmentTime}
-                onSubmit={(data) => {
-                  setDoctor(data.doctor);
-                  setSpecialty(data.specialty);
-                  setAppointmentDate(data.appointmentDate);
-                  setAppointmentTime(data.appointmentTime);
-                  setNotes(data.notes || "");
-
-                  handleSubmit(new Event("submit") as any);
-                }}
+                onSubmit={handleFormSubmit}
+                onClear={handleClearForm}
               />
             </div>
           </div>
