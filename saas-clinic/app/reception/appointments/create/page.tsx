@@ -5,6 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import { useRouter } from "next/navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import AppointmentForm from "@/components/AppointmentsForm";
 import PatientSearch, { LookupPatient } from "@/components/PatientSearch";
 import PreviousVisits, { Visit } from "@/components/PreviousVisits";
 
@@ -28,7 +29,7 @@ export default function CreateAppointmentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedPatient) {
       alert(language === "ar" ? "يرجى اختيار مريض أولاً" : "Please select a patient first");
       return;
@@ -37,7 +38,6 @@ export default function CreateAppointmentPage() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
       const response = await fetch("/api/clinic/appointments/create", {
         method: "POST",
         headers: {
@@ -86,30 +86,8 @@ export default function CreateAppointmentPage() {
     setNotes("");
   };
 
-  // Dummy data for previous visits - In production, fetch this from API based on selectedPatient
-  const dummyVisits: Visit[] = selectedPatient
-    ? [
-        {
-          date: "2025-02-28",
-          clinic: language === "ar" ? "عيادة الجلدية" : "Dermatology Clinic",
-          diagnosis:
-            language === "ar" ? "حساسية جلدية مزمنة" : "Chronic skin allergy",
-          doctor: language === "ar" ? "د. حازم ربيع" : "Dr. Hazem Rabee",
-        },
-        {
-          date: "2025-01-15",
-          clinic: language === "ar" ? "عيادة العيون" : "Ophthalmology",
-          diagnosis: language === "ar" ? "قصر نظر بسيط" : "Mild myopia",
-          doctor: language === "ar" ? "د. سناء شحادة" : "Dr. Sanaa Shahada",
-        },
-        {
-          date: "2024-12-10",
-          clinic: language === "ar" ? "عيادة الأسنان" : "Dental Clinic",
-          diagnosis: language === "ar" ? "تسوس الأسنان" : "Tooth decay",
-          doctor: language === "ar" ? "د. أحمد الحلو" : "Dr. Ahmad Al-Helo",
-        },
-      ]
-    : [];
+  // Previous visits will be fetched from API in production
+  const previousVisits: Visit[] = [];
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
@@ -160,7 +138,6 @@ export default function CreateAppointmentPage() {
               showSelectedCard={false}
             />
 
-            {/* Selected Patient Display */}
             {selectedPatient && (
               <div className="mt-4 p-4 bg-teal-50 border border-teal-200 rounded-xl">
                 <div className="flex items-start justify-between">
@@ -192,7 +169,7 @@ export default function CreateAppointmentPage() {
             )}
           </div>
 
-          {/* Previous Visits Section - Shows when patient is selected */}
+          {/* Previous Visits Section */}
           {selectedPatient && (
             <div>
               <div className="mb-4">
@@ -206,10 +183,43 @@ export default function CreateAppointmentPage() {
                 </p>
               </div>
 
-              <PreviousVisits visits={dummyVisits} showSummary={true} />
+              <PreviousVisits visits={previousVisits} showSummary={true} />
             </div>
           )}
         </div>
+
+        {/* Step 3: Appointment Details */}
+        {selectedPatient && (
+          <div className="mt-8 max-w-4xl mx-auto">
+            <div className="mb-4 text-center">
+              <h2 className="text-lg font-semibold text-slate-900 mb-1">
+                {language === "ar" ? "3. تفاصيل الموعد" : "3. Appointment Details"}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {language === "ar"
+                  ? "حدد الطبيب، التخصص، الوقت والتاريخ وأي ملاحظات إضافية"
+                  : "Select doctor, specialty, date, time, and any additional notes"}
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+              <AppointmentForm
+                initialDoctor={doctor}
+                initialDate={appointmentDate}
+                initialTime={appointmentTime}
+                onSubmit={(data) => {
+                  setDoctor(data.doctor);
+                  setSpecialty(data.specialty);
+                  setAppointmentDate(data.appointmentDate);
+                  setAppointmentTime(data.appointmentTime);
+                  setNotes(data.notes || "");
+
+                  handleSubmit(new Event("submit") as any);
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

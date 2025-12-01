@@ -293,7 +293,11 @@ export const translations = {
     qaDailyReportTitle: "View today’s incoming amounts",
     qaDailyReportDesc:
       "Total payments, paid/unpaid invoices and cash vs electronic amounts.",
-    // New patient page
+     qaNewAppointmentLabel: "New Appointment",
+  qaNewAppointmentTitle: "Create a new appointment",
+  qaNewAppointmentDesc: "Select time, doctor, and type of consultation quickly",
+
+      // New patient page
     patientsManagement: "Patients management",
     newPatient: "New Patient",
     newPatientSubtitle:
@@ -547,6 +551,9 @@ export const translations = {
     bookAppointment: 'حجز موعد',
     recentVisits: 'الزيارات الحديثة',
     visitHistoryWillAppear: 'سيظهر تاريخ زياراتك هنا',
+     qaNewAppointmentLabel: "حجز موعد جديد",
+  qaNewAppointmentTitle: "إنشاء موعد جديد للمريض",
+  qaNewAppointmentDesc: "تحديد وقت، طبيب، ونوع الاستشارة بسهولة وسرعة",
 
     // Staff Management
     addStaffMember: 'إضافة موظف',

@@ -1,6 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+// import { getPatientMedicalHistory, getMyMedicalHistory } from "@/app/api/medicalHistory";
 
 export type Visit = {
   date: string;
@@ -13,14 +16,70 @@ interface PreviousVisitsProps {
   visits?: Visit[];
   showSummary?: boolean;
   className?: string;
+  patientId?: number;
 }
 
 export default function PreviousVisits({
-  visits = [],
+  visits: initialVisits,
   showSummary = true,
   className = "",
+  patientId,
 }: PreviousVisitsProps) {
   const { language } = useLanguage();
+  const { token, user } = useAuth();
+  const [visits, setVisits] = useState<Visit[]>(initialVisits || []);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // If visits are passed via props, use them and don't fetch
+    if (initialVisits) {
+      setVisits(initialVisits);
+      return;
+    }
+
+    const fetchHistory = async () => {
+      if (!token) return;
+
+      setLoading(true);
+      setError(null);
+      try {
+        let data: Visit[] = [];
+        if (patientId) {
+          data = await getPatientMedicalHistory(patientId, token);
+        } else if (user?.role === 'Patient') {
+          data = await getMyMedicalHistory(token);
+        }
+        setVisits(data);
+      } catch (err) {
+        console.error("Failed to fetch medical history", err);
+        setError("Failed to load medical history");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [initialVisits, patientId, token, user?.role]);
+
+  if (loading && !initialVisits) {
+    return (
+      <div className={`p-8 text-center ${className}`}>
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        <p className="mt-2 text-sm text-slate-500">
+          {language === "ar" ? "جاري التحميل..." : "Loading..."}
+        </p>
+      </div>
+    );
+  }
+
+  if (error && !initialVisits) {
+    return (
+      <div className={`p-4 bg-red-50 text-red-600 rounded-lg text-sm text-center ${className}`}>
+        {language === "ar" ? "حدث خطأ أثناء تحميل السجل الطبي" : "Error loading medical history"}
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
