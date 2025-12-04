@@ -1,23 +1,68 @@
 "use client";
 
+console.log("🔥 DoctorDashboard FILE loaded");
+
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Appointment } from "@/types/appointment";
 import { DoctorStats } from "@/components/doctor/DoctorStats";
 
 import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/DashboardHeader";
 import DashboardHero from "@/components/DashboardHero";
 
 interface AppointmentsResponse {
-  appointments: Appointment[];
+  appointments?: Appointment[] | any[];
+  data?: Appointment[] | any[];
 }
+
 type ApiError = {
   message?: string;
   error?: string;
 };
+
+// نوحد شكل بيانات الـ API مع type Appointment
+function normalizeAppointments(json: any): Appointment[] {
+  const base: any[] = Array.isArray(json)
+    ? json
+    : json.appointments ?? json.data ?? [];
+
+  return base.map((a: any) => {
+    const appointment_date =
+      a.appointment_date ??
+      (a.dateTime
+        ? new Date(a.dateTime).toISOString().slice(0, 10)
+        : undefined);
+
+    const appointment_time =
+      a.appointment_time ??
+      (a.dateTime
+        ? new Date(a.dateTime).toTimeString().slice(0, 5)
+        : undefined);
+
+    const dateTime =
+      a.dateTime ??
+      (appointment_date && appointment_time
+        ? `${appointment_date}T${appointment_time}`
+        : appointment_date
+        ? `${appointment_date}T00:00`
+        : undefined);
+
+    const normalized: Appointment = {
+      ...a,
+      id: a.id ?? a.appointment_id,
+      patientName: a.patientName ?? a.patient_name ?? "",
+      patientPhone: a.patientPhone ?? a.patient_phone ?? "",
+      clinicName: a.clinicName ?? a.clinic_name ?? "",
+      notes: a.notes ?? a.reason ?? "",
+      status: a.status ?? a.appointment_status ?? "requested",
+      dateTime,
+    };
+
+    return normalized;
+  });
+}
 
 export default function DoctorDashboard() {
   const { user, token, logout, clinic, isLoading } = useAuth();
@@ -32,50 +77,74 @@ export default function DoctorDashboard() {
     null
   );
 
-  useEffect(() => {
-    if (!user || !token) return;
+  const fetchAppointments = useCallback(async () => {
+    console.log("🚀 [Dashboard] useEffect/fetchAppointments running");
 
-    const fetchAppointments = async () => {
-      try {
-        setIsLoadingAppointments(true);
-        setAppointmentsError(null);
+    if (!user || !token) {
+      console.log("⛔ [Dashboard] no user or token", { user, token });
+      return;
+    }
 
-        const res = await fetch("/api/doctor/appointments", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    try {
+      setIsLoadingAppointments(true);
+      setAppointmentsError(null);
 
-        const json = await res.json();
+      console.log(
+        "➡️ [Dashboard] FETCH /api/doctor/appointments with token:",
+        token
+      );
 
-        if (!res.ok) {
-          const errorData = json as ApiError;
-          throw new Error(
-            errorData.message ||
-              errorData.error ||
-              (isArabic
-                ? "فشل في جلب المواعيد"
-                : "Failed to fetch appointments")
-          );
-        }
+      const res = await fetch("/api/doctor/appointments", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        const data = json as AppointmentsResponse;
-        setAppointments(data.appointments);
-      } catch (err: unknown) {
-        console.error("Error fetching appointments:", err);
-        let message = isArabic
-          ? "فشل في جلب المواعيد"
-          : "Failed to fetch appointments";
-        if (err instanceof Error) message = err.message;
-        setAppointmentsError(message);
-      } finally {
-        setIsLoadingAppointments(false);
+      console.log("[Dashboard] Response status:", res.status);
+      const json: AppointmentsResponse = await res.json().catch((e) => {
+        console.error("[Dashboard] Error parsing JSON:", e);
+        return {};
+      });
+      console.log("⬅️ [Dashboard] RAW API RESPONSE:", json);
+
+      if (!res.ok) {
+        const errorData = json as ApiError;
+        throw new Error(
+          errorData.message ||
+            errorData.error ||
+            (isArabic ? "فشل في جلب المواعيد" : "Failed to fetch appointments")
+        );
       }
-    };
 
-    fetchAppointments();
+      const normalized = normalizeAppointments(json);
+      console.log(
+        "✅ [Dashboard] normalized appointments length:",
+        normalized.length
+      );
+      console.log("🧪 [Dashboard] first appointment:", normalized[0]);
+
+      setAppointments(normalized);
+    } catch (err: unknown) {
+      console.error("❌ [Dashboard] Error fetching appointments:", err);
+      let message = isArabic
+        ? "فشل في جلب المواعيد"
+        : "Failed to fetch appointments";
+      if (err instanceof Error) message = err.message;
+      setAppointmentsError(message);
+    } finally {
+      setIsLoadingAppointments(false);
+    }
   }, [user, token, isArabic]);
+
+  useEffect(() => {
+    console.log("🔁 [Dashboard] useEffect dependency change", {
+      user,
+      token,
+      isArabic,
+    });
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   if (isLoading || !user) {
     return (
@@ -110,7 +179,7 @@ export default function DoctorDashboard() {
           }
           primaryAction={
             <button
-              onClick={() => router.push("/doctor/appointments?view=today")}
+              onClick={() => router.push("/doctor/today-appointments/")}
               className="mt-3 inline-flex items-center px-4 py-2.5 rounded-xl bg-white text-teal-700 text-xs font-semibold shadow-sm hover:bg-teal-50"
             >
               {isArabic ? "عرض جدول اليوم" : "View today’s schedule"}
@@ -150,6 +219,11 @@ export default function DoctorDashboard() {
             </p>
           </div>
           <DoctorStats appointments={appointments} />
+          {isLoadingAppointments && (
+            <p className="mt-2 text-xs text-slate-500">
+              {isArabic ? "جاري تحميل المواعيد..." : "Loading appointments..."}
+            </p>
+          )}
           {appointmentsError && (
             <p className="mt-2 text-xs text-red-600">{appointmentsError}</p>
           )}
@@ -169,7 +243,6 @@ export default function DoctorDashboard() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* زر يفتح صفحة المواعيد */}
             <button
               onClick={() => router.push("/doctor/appointments")}
               type="button"
@@ -190,7 +263,6 @@ export default function DoctorDashboard() {
               </span>
             </button>
 
-            {/* باقي الكروت كما هي */}
             <button
               type="button"
               className="flex flex-col items-start gap-1 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-cyan-50 hover:border-cyan-200 transition px-3 py-3 text-left"

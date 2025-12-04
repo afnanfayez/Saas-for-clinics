@@ -1,4 +1,5 @@
 "use client";
+console.log("🔥 DoctorDashboard FILE loaded");
 
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
@@ -7,7 +8,6 @@ import type { Appointment } from "@/types/appointment";
 import { AppointmentFilters } from "@/components/doctor/AppointmentFilters";
 import { AppointmentTable } from "@/components/doctor/AppointmentTable";
 import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
@@ -299,7 +299,7 @@ export default function DoctorAppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50" dir={isArabic ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 " dir={isArabic ? "rtl" : "ltr"}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
        
         <PageHeader
