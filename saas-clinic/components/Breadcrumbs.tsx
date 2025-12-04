@@ -5,7 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 interface BreadcrumbItem {
   label: string;
-  href: string | null; // null means non-clickable (current role context)
+  href: string | null;
 }
 
 interface BreadcrumbsProps {
@@ -33,79 +33,73 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
     settings: { en: 'Settings', ar: 'الإعدادات' },
     appointments: { en: 'Appointments', ar: 'المواعيد' },
     patients: { en: 'Patients', ar: 'المرضى' },
+    search: { en: 'Search', ar: 'بحث' },
+    create: { en: 'Create appointment', ar: 'إنشاء موعد' },
     'medical-record': { en: 'Medical Record', ar: 'السجل الطبي' },
     'medical-records': { en: 'Medical Records', ar: 'السجلات الطبية' },
     'medical-history': { en: 'Medical History', ar: 'التاريخ الطبي' },
     analytics: { en: 'Analytics', ar: 'التحليلات' },
+    'add-staff': { en: 'Add Staff', ar: 'إضافة موظف' },
+    'management-staff': { en: 'Management Staff', ar: 'إدارة الموظفين' },
   };
 
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
-    if (customItems) {
-      return customItems;
-    }
+    if (customItems) return customItems;
 
     const paths = pathname.split('/').filter(Boolean);
     const breadcrumbs: BreadcrumbItem[] = [];
 
-    if (paths.length === 0) {
-      return breadcrumbs;
-    }
+    if (paths.length === 0) return breadcrumbs;
 
     const role = paths[0];
     const roleLabel = roleLabels[role];
-
-    if (!roleLabel) {
-      return breadcrumbs;
-    }
+    if (!roleLabel) return breadcrumbs;
 
     const dashboardLabel = translations.dashboard?.[language] ?? 'Dashboard';
     const dashboardHref = `/${role}/dashboard`;
 
-    breadcrumbs.push({
-      label: roleLabel[language],
-      href: dashboardHref,
-    });
+    breadcrumbs.push({ label: roleLabel[language], href: dashboardHref });
 
     const isOnDashboard = pathname === dashboardHref || paths[1] === 'dashboard';
-    breadcrumbs.push({
-      label: dashboardLabel,
-      href: isOnDashboard ? null : dashboardHref,
-    });
+    breadcrumbs.push({ label: dashboardLabel, href: isOnDashboard ? null : dashboardHref });
 
     let currentPath = `/${role}`;
     for (let i = 1; i < paths.length; i++) {
       const segment = paths[i];
-
       if (segment === 'dashboard') {
         currentPath = dashboardHref;
         continue;
       }
-
-      if (segment.match(/^\d+$/)) {
-        continue;
-      }
+      if (segment.match(/^\d+$/)) continue;
 
       currentPath += `/${segment}`;
       const translation = translations[segment];
 
+      const isPatientNewAppointment = role === 'patient' && paths[i - 1] === 'appointments' && segment === 'new';
+      const isReceptionNewPatient = role === 'reception' && paths[i - 1] === 'patients' && segment === 'new';
+
+      const label = isPatientNewAppointment
+        ? language === 'ar'
+          ? 'موعد جديد'
+          : 'New Appointment'
+        : isReceptionNewPatient
+        ? language === 'ar'
+          ? 'مريض جديد'
+          : 'New Patient'
+        : translation
+        ? translation[language]
+        : segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+
       const href = segment === 'patients' ? null : currentPath;
 
-      breadcrumbs.push({
-        label: translation
-          ? translation[language]
-          : segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
-        href,
-      });
+      breadcrumbs.push({ label, href });
     }
 
     return breadcrumbs;
   };
 
   const breadcrumbs = generateBreadcrumbs();
-
-  if (breadcrumbs.length === 0) {
-    return null;
-  }
+  if (breadcrumbs.length === 0) return null;
 
   return (
     <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4" aria-label="Breadcrumb">
@@ -124,10 +118,7 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
           {index === breadcrumbs.length - 1 || crumb.href === null ? (
             <span className="font-medium text-gray-900">{crumb.label}</span>
           ) : (
-            <button
-              onClick={() => crumb.href && router.push(crumb.href)}
-              className="hover:text-teal-600 transition-colors"
-            >
+            <button onClick={() => crumb.href && router.push(crumb.href)} className="hover:text-teal-600 transition-colors">
               {crumb.label}
             </button>
           )}
