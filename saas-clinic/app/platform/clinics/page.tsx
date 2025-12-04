@@ -3,9 +3,9 @@
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { translations } from '@/lib/translations';
-import DashboardHeader from '@/components/DashboardHeader';
 import ConfirmModal from '@/components/ConfirmModal';
 import Toast from '@/components/Toast';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useRoleGuard } from '@/lib/roleGuard';
@@ -32,7 +32,7 @@ interface PaginationMeta {
 }
 
 export default function ClinicsManagement() {
-  const { user, token, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, token, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
@@ -212,9 +212,8 @@ export default function ClinicsManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={{ name: user.name, role: user.role }} logout={logout} t={t} />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <Breadcrumbs />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

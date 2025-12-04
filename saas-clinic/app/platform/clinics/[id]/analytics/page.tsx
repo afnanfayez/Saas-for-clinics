@@ -3,7 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { translations } from '@/lib/translations';
-import DashboardHeader from '@/components/DashboardHeader';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useRoleGuard } from '@/lib/roleGuard';
@@ -70,7 +70,7 @@ interface ClinicAnalytics {
 type UserRole = 'doctors' | 'patients' | 'secretaries' | 'managers';
 
 export default function ClinicAnalytics() {
-  const { user, token, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, token, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
@@ -167,7 +167,6 @@ export default function ClinicAnalytics() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <DashboardHeader user={{ name: user.name, role: user.role }} logout={logout} t={t} />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
             <p className="text-red-800 font-medium">{error}</p>
@@ -195,9 +194,14 @@ export default function ClinicAnalytics() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={{ name: user.name, role: user.role }} logout={logout} t={t} />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <Breadcrumbs
+          customItems={[
+            { label: language === 'ar' ? 'لوحة التحكم' : 'Dashboard', href: '/platform/dashboard' },
+            { label: language === 'ar' ? 'العيادات' : 'Clinics', href: '/platform/clinics' },
+            { label: clinic.name, href: `/platform/clinics/${clinic.clinic_id}/analytics` },
+          ]}
+        />
         {/* Header with Clinic Info */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-start justify-between">

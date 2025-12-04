@@ -4,11 +4,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import DashboardHeader from '@/components/DashboardHeader';
 import DashboardHero from '@/components/DashboardHero';
 import StatCard from '@/components/StatCard';
 import RevenueChart from '@/components/RevenueChart';
 import ClinicGrowthChart from '@/components/ClinicGrowthChart';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useRoleGuard } from '@/lib/roleGuard';
@@ -43,7 +43,7 @@ interface GrowthData {
 }
 
 export default function PlatformDashboard() {
-  const { user, token, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, token, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
@@ -108,13 +108,8 @@ export default function PlatformDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader 
-        user={{ name: user.name, role: user.role }}
-        logout={logout}
-        t={t}
-      />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <Breadcrumbs />
         <DashboardHero
           title={
             language === 'ar'

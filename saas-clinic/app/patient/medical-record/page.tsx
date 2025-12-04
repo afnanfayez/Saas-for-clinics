@@ -4,14 +4,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { translations } from "@/lib/translations";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import PreviousVisits, { Visit } from "@/components/PreviousVisits";
+import PreviousVisits from "@/components/PreviousVisits";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function MedicalRecordPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
-  const t = translations[language];
   const router = useRouter();
 
   useEffect(() => {
@@ -31,34 +29,32 @@ export default function MedicalRecordPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
+        <Breadcrumbs />
+
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-slate-500 mb-1">
-              {language === "ar" ? "السجل الطبي" : "Medical record"}
+              {language === "ar" ? "OU,O3OªU, OU,OúO\"US" : "Medical record"}
             </p>
             <h1 className="text-2xl font-bold text-slate-900">
               {language === "ar"
-                ? "سجلك الطبي وزياراتك السابقة"
+                ? "O3OªU,UŸ OU,OúO\"US U^OýUSOOñOO¦UŸ OU,O3OO\"U,Oc"
                 : "Your medical record and previous visits"}
             </h1>
             <p className="text-sm text-slate-500 mt-1">
               {language === "ar"
-                ? "يمكنك هنا الاطلاع على ملخص زياراتك وتشخيصاتك السابقة."
+                ? "USU.UŸU+UŸ UØU+O OU,OOúU,OO1 O1U,U% U.U,OrOæ OýUSOOñOO¦UŸ U^O¦O'OrUSOæOO¦UŸ OU,O3OO\"U,Oc."
                 : "Here you can view a summary of your previous visits and diagnoses."}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <button
-              onClick={() => router.push("/patient/dashboard")}
-              className="text-sm text-teal-700 hover:text-teal-800 hover:underline"
-            >
-              {language === "ar" ? "رجوع" : "Back"}
-            </button>
-          </div>
+          <button
+            onClick={() => router.push("/patient/dashboard")}
+            className="text-sm text-teal-700 hover:text-teal-800 hover:underline"
+          >
+            {language === "ar" ? "OñOªU^O1" : "Back"}
+          </button>
         </div>
 
-        {/* PreviousVisits will automatically fetch data for authenticated patient */}
         <PreviousVisits showSummary={true} />
       </div>
     </div>
