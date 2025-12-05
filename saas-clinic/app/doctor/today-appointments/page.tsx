@@ -10,28 +10,31 @@ import type { Appointment } from "@/types/appointment";
 import AppointmentDetailsModal from "@/components/doctor/AppointmentDetailsModal";
 import CreateMedicalRecordForm from "@/components/doctor/CreateMedicalRecordForm";
 
-// ========= API TYPES ========= //
-interface AppointmentsResponse {
-  appointments: Appointment[];
+// ======== API TYPES التي نحتاجها فقط ======== //
+interface ApiPatient {
+  patient_id: number;
+  name: string;
+  phone: string;
+}
+
+interface ApiAppointment {
+  appointment_id: number;
+  appointment_date: string; // "2025-12-05T00:00:00.000000Z"
+  appointment_time: string | null; // "15:48:00"
+  status: string;
+  notes: string | null;
+  patient: ApiPatient;
+}
+
+interface TodayAppointmentsResponse {
+  appointments: ApiAppointment[];
+  total: number;
+  date: string;
 }
 
 interface ApiError {
   message?: string;
   error?: string;
-}
-
-function isToday(dateTime?: string | null) {
-  if (!dateTime) return false;
-
-  const d = new Date(dateTime);
-  if (Number.isNaN(d.getTime())) return false;
-
-  const now = new Date();
-  return (
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate()
-  );
 }
 
 export default function TodayAppointmentsPage() {
@@ -55,8 +58,7 @@ export default function TodayAppointmentsPage() {
   useEffect(() => {
     const id = setTimeout(() => {
       setSearchQuery(searchInput.trim().toLowerCase());
-    }, 300); // 300ms
-
+    }, 300);
     return () => clearTimeout(id);
   }, [searchInput]);
 
@@ -69,13 +71,14 @@ export default function TodayAppointmentsPage() {
         setLoadingAppointments(true);
         setError(null);
 
-        const res = await fetch(`/api/doctor/appointments?date=today`, {
+        const res = await fetch(`/api/doctor/appointments/today`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         const json = await res.json();
+        console.log("TODAY APPOINTMENTS RESPONSE => ", json);
 
         if (!res.ok) {
           const errData = json as ApiError;
@@ -95,13 +98,28 @@ export default function TodayAppointmentsPage() {
           );
         }
 
-        const data = json as AppointmentsResponse;
+        const data = json as TodayAppointmentsResponse;
 
-        const todays = (data.appointments || []).filter((a) =>
-          isToday(a.dateTime)
+        const mapped: Appointment[] = (data.appointments || []).map(
+          (a: ApiAppointment) => {
+            const dateOnly = a.appointment_date.slice(0, 10); // "2025-12-05"
+            const dateTime = a.appointment_time
+              ? `${dateOnly}T${a.appointment_time}` // "2025-12-05T15:48:00"
+              : a.appointment_date;
+
+            return {
+              id: a.appointment_id,
+              dateTime,
+              status: a.status,
+              notes: a.notes ?? undefined,
+              patientName: a.patient?.name ?? undefined,
+              patientPhone: a.patient?.phone ?? undefined,
+              clinicName: undefined,
+            };
+          }
         );
 
-        setAppointments(todays);
+        setAppointments(mapped);
       } catch (err: unknown) {
         const message =
           err instanceof Error
@@ -128,7 +146,6 @@ export default function TodayAppointmentsPage() {
     );
   }, [appointments, searchQuery]);
 
-  // ---------- تحديد أقرب موعد (next appointment) ---------- //
   const nextAppointmentId = useMemo(() => {
     const now = new Date().getTime();
 
@@ -328,8 +345,8 @@ export default function TodayAppointmentsPage() {
           appointment={selectedAppointment}
           onClose={() => setSelectedAppointment(null)}
           onCreateMedicalRecord={(appt) => {
-            setSelectedAppointment(null); // سكّري مودال التفاصيل
-            setRecordAppointment(appt); // افتحي مودال السجل الطبي
+            setSelectedAppointment(null);
+            setRecordAppointment(appt);
           }}
         />
       )}
@@ -338,8 +355,8 @@ export default function TodayAppointmentsPage() {
           appointment={recordAppointment}
           onClose={() => setRecordAppointment(null)}
           onSuccess={() => {
-            // هون تقدري تعملي refetch لمواعيد اليوم لو حابة
-            // fetchTodayAppointments(); لو طلعناه على مستوى أعلى
+            // لو حابة تعملي refetch بعد إنشاء سجل طبي
+            // ممكن نطلع fetchTodayAppointments لبرا وننده هنا
           }}
         />
       )}
