@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
 import type { Appointment } from "@/types/appointment";
 import AppointmentDetailsModal from "@/components/doctor/AppointmentDetailsModal";
+import CreateMedicalRecordForm from "@/components/doctor/CreateMedicalRecordForm";
 
 // ========= API TYPES ========= //
 interface AppointmentsResponse {
@@ -45,6 +46,9 @@ export default function TodayAppointmentsPage() {
 
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [recordAppointment, setRecordAppointment] =
+    useState<Appointment | null>(null);
+
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
 
@@ -116,7 +120,6 @@ export default function TodayAppointmentsPage() {
     fetchTodayAppointments();
   }, [user, token, isArabic]);
 
-  // ---------- فلترة حسب الاسم ---------- //
   const filteredAppointments = useMemo(() => {
     if (!searchQuery) return appointments;
 
@@ -147,7 +150,6 @@ export default function TodayAppointmentsPage() {
     return times[0].id;
   }, [filteredAppointments]);
 
-  // ---------- Loading عام لصفحة الدكتور ---------- //
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -178,9 +180,7 @@ export default function TodayAppointmentsPage() {
           backAction={() => router.push("/doctor/dashboard")}
         />
 
-        {/* ====== TABLE + SEARCH ====== */}
         <section className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          {/* عنوان + عدد المواعيد + بحث */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -210,7 +210,6 @@ export default function TodayAppointmentsPage() {
             </div>
           </div>
 
-          {/* ====== TABLE ====== */}
           <div className="overflow-x-auto border rounded-2xl border-slate-100">
             {loadingAppointments ? (
               <p className="p-5 text-sm text-slate-500">
@@ -329,8 +328,18 @@ export default function TodayAppointmentsPage() {
           appointment={selectedAppointment}
           onClose={() => setSelectedAppointment(null)}
           onCreateMedicalRecord={(appt) => {
-            // هون لاحقاً تفتحي CreateMedicalRecordForm (الجزء الثالث من التاسك)
-            console.log("Create record for appointment:", appt.id);
+            setSelectedAppointment(null); // سكّري مودال التفاصيل
+            setRecordAppointment(appt); // افتحي مودال السجل الطبي
+          }}
+        />
+      )}
+      {recordAppointment && (
+        <CreateMedicalRecordForm
+          appointment={recordAppointment}
+          onClose={() => setRecordAppointment(null)}
+          onSuccess={() => {
+            // هون تقدري تعملي refetch لمواعيد اليوم لو حابة
+            // fetchTodayAppointments(); لو طلعناه على مستوى أعلى
           }}
         />
       )}

@@ -7,8 +7,6 @@ import type { Appointment } from "@/types/appointment";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 
-// --------- Types from task spec --------- //
-
 interface MedicalRecord {
   id: number;
   visit_date: string;
@@ -36,6 +34,13 @@ interface PatientHistoryResponse {
   patient: PatientFromApi;
   medicalHistory: MedicalRecord[];
 }
+
+type PatientHistoryApiResponse =
+  | PatientHistoryResponse
+  | (Partial<PatientHistoryResponse> & {
+      history?: MedicalRecord[];
+      message?: string;
+    });
 
 interface AppointmentDetailsModalProps {
   appointment: Appointment;
@@ -146,21 +151,24 @@ export default function AppointmentDetailsModal({
           }
         );
 
-        const json = (await res.json()) as PatientHistoryResponse | any;
+        const json = (await res.json()) as PatientHistoryApiResponse;
 
         if (!res.ok) {
           const msg =
-            json?.message ||
+            ("message" in json && json.message) ||
             (isArabic
               ? "فشل في جلب سجل المريض"
               : "Failed to fetch patient history");
-          throw new Error(msg);
+          throw new Error(msg || "");
         }
 
-        if (json.patient) setPatient(json.patient);
-        if (Array.isArray(json.medicalHistory)) {
+        if ("patient" in json && json.patient) {
+          setPatient(json.patient);
+        }
+
+        if ("medicalHistory" in json && Array.isArray(json.medicalHistory)) {
           setHistory(json.medicalHistory);
-        } else if (Array.isArray(json.history)) {
+        } else if ("history" in json && Array.isArray(json.history)) {
           // fallback لو اسم الحقل مختلف في الباك
           setHistory(json.history);
         }
