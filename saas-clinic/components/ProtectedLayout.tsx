@@ -11,7 +11,7 @@ interface ProtectedLayoutProps {
 }
 
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, clinic } = useAuth();
   const { language } = useLanguage();
   const isArabic = language === "ar";
   const t = translations[language] ?? {};
@@ -23,6 +23,7 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
           user={{ name: user.name, role: user.role }}
           logout={logout}
           t={t}
+          clinic={clinic}
         />
       )}
       {children}
