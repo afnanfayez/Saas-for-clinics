@@ -76,7 +76,6 @@ export default function AppointmentDetailsModal({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // اسم المريض (من الـ API لو موجود، وإلا من الـ appointment)
   const displayName = useMemo(() => {
     if (patient?.user?.name?.trim()) return patient.user.name;
     if (appointment.patientName?.trim()) return appointment.patientName;
@@ -126,7 +125,7 @@ export default function AppointmentDetailsModal({
         const db = new Date(b.visit_date).getTime();
         return db - da; // latest first
       })
-      .slice(0, 5); // آخر 5 زيارات فقط
+      .slice(0, 5);
   }, [history]);
 
   // -------- FETCH PATIENT HISTORY -------- //

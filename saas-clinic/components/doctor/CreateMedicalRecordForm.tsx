@@ -124,26 +124,24 @@ export default function CreateMedicalRecordForm({
       setSubmitting(true);
 
       const payload = {
-        patient_id: appointment.patientId,
-        appointment_id: appointment.id,
-        visit_date: todayLabel,
         symptoms: symptoms.trim(),
         diagnosis: diagnosis.trim(),
         prescription: prescription.trim(),
         next_visit: nextVisit || null,
       };
 
-      const res = await fetch("/api/doctor/medical-records", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
+      const res = await fetch(
+        `/api/doctor/appointments/complete/${appointment.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
       const json = await res.json();
-
       if (!res.ok) {
         const msg =
           json?.message ||
