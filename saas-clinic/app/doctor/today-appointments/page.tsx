@@ -63,80 +63,70 @@ export default function TodayAppointmentsPage() {
   }, [searchInput]);
 
   // ---------- Fetch Appointments ---------- //
-  useEffect(() => {
-    if (!user || !token) return;
+const fetchTodayAppointments = async () => {
+  try {
+    setLoadingAppointments(true);
+    setError(null);
 
-    const fetchTodayAppointments = async () => {
-      try {
-        setLoadingAppointments(true);
-        setError(null);
+    const res = await fetch(`/api/doctor/appointments/today`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-        const res = await fetch(`/api/doctor/appointments/today`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    const json = await res.json();
 
-        const json = await res.json();
-        console.log("TODAY APPOINTMENTS RESPONSE => ", json);
+    if (!res.ok) {
+      const errData = json as ApiError;
+      throw new Error(
+        errData.message ||
+          errData.error ||
+          (isArabic
+            ? "فشل في جلب مواعيد اليوم"
+            : "Failed to fetch today's appointments")
+      );
+    }
 
-        if (!res.ok) {
-          const errData = json as ApiError;
-          if (res.status === 401 || res.status === 403) {
-            toast.error(
-              isArabic
-                ? "انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى"
-                : "Session expired, please login again"
-            );
-          }
-          throw new Error(
-            errData.message ||
-              errData.error ||
-              (isArabic
-                ? "فشل في جلب مواعيد اليوم"
-                : "Failed to fetch today's appointments")
-          );
-        }
+    const data = json as TodayAppointmentsResponse;
 
-        const data = json as TodayAppointmentsResponse;
+    const mapped: Appointment[] = (data.appointments || []).map((a) => {
+      const dateOnly = a.appointment_date.slice(0, 10);
+      const dateTime = a.appointment_time
+        ? `${dateOnly}T${a.appointment_time}`
+        : a.appointment_date;
 
-        const mapped: Appointment[] = (data.appointments || []).map(
-          (a: ApiAppointment) => {
-            const dateOnly = a.appointment_date.slice(0, 10); // "2025-12-05"
-            const dateTime = a.appointment_time
-              ? `${dateOnly}T${a.appointment_time}` // "2025-12-05T15:48:00"
-              : a.appointment_date;
+      return {
+        id: a.appointment_id,
+        dateTime,
+        status: a.status,
+        notes: a.notes || undefined,
+        patientName: a.patient?.name || undefined,
+        patientPhone: a.patient?.phone || undefined,
+        patientId: a.patient?.patient_id,
+      };
+    });
 
-            return {
-              id: a.appointment_id,
-              dateTime,
-              status: a.status,
-              notes: a.notes ?? undefined,
-              patientName: a.patient?.name ?? undefined,
-              patientPhone: a.patient?.phone ?? undefined,
-              clinicName: undefined,
-            };
-          }
-        );
+    setAppointments(mapped);
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : isArabic
+        ? "حدث خطأ أثناء جلب المواعيد"
+        : "Something went wrong while fetching appointments";
 
-        setAppointments(mapped);
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : isArabic
-            ? "حدث خطأ أثناء جلب المواعيد"
-            : "Something went wrong while fetching appointments";
+    setError(message);
+    toast.error(message);
+  } finally {
+    setLoadingAppointments(false);
+  }
+};
 
-        setError(message);
-        toast.error(message);
-      } finally {
-        setLoadingAppointments(false);
-      }
-    };
+useEffect(() => {
+  if (!user || !token) return;
+  fetchTodayAppointments();
+}, [user, token, isArabic]);
 
-    fetchTodayAppointments();
-  }, [user, token, isArabic]);
 
   const filteredAppointments = useMemo(() => {
     if (!searchQuery) return appointments;
@@ -355,9 +345,9 @@ export default function TodayAppointmentsPage() {
           appointment={recordAppointment}
           onClose={() => setRecordAppointment(null)}
           onSuccess={() => {
-            // لو حابة تعملي refetch بعد إنشاء سجل طبي
-            // ممكن نطلع fetchTodayAppointments لبرا وننده هنا
-          }}
+      fetchTodayAppointments();
+      setRecordAppointment(null);
+    }}
         />
       )}
     </div>
