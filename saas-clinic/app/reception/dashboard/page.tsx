@@ -7,11 +7,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useRoleGuard } from "@/lib/roleGuard";
 import DashboardHero from "@/components/DashboardHero";
-import DashboardHeader from "@/components/DashboardHeader";
 import StatCard from "@/components/StatCard";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function ReceptionDashboard() {
-  const { user, logout, clinic, isAuthenticated, isLoading } = useAuth();
+  const { user, clinic, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
@@ -145,9 +145,8 @@ export default function ReceptionDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={user} logout={logout} t={t} />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <Breadcrumbs />
         {/* Hero */}
         <DashboardHero
           title={
@@ -345,24 +344,20 @@ export default function ReceptionDashboard() {
                   "البحث باستخدام رقم الهوية أو رقم الهاتف لفتح الملف الطبي"}
               </span>
             </button>
-
-            {/* Appointment requests */}
             <button
-              onClick={() => router.push("/reception/appointments/requests")}
-              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-emerald-50 hover:border-emerald-200 transition px-4 py-3 text-left"
-            >
-              <span className="text-xs font-semibold text-emerald-700">
-                {t.qaRequestsLabel || "طلبات المواعيد"}
-              </span>
-              <span className="text-sm font-medium text-gray-900">
-                {t.qaRequestsTitle ||
-                  "مراجعة الطلبات القادمة من البوابة الإلكترونية"}
-              </span>
-              <span className="text-[11px] text-gray-500">
-                {t.qaRequestsDesc ||
-                  "تدقيق التفاصيل وإرسال الطلب للطبيب المناسب للموافقة"}
-              </span>
-            </button>
+  onClick={() => router.push("/reception/appointments/create")}
+  className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 hover:bg-purple-100 hover:border-purple-300 transition px-4 py-3 text-left"
+>
+  <span className="text-xs font-semibold text-purple-700">
+    {t.qaNewAppointmentLabel || (language === "ar" ? "حجز موعد جديد" : "New Appointment")}
+  </span>
+  <span className="text-sm font-medium text-gray-900">
+    {t.qaNewAppointmentTitle || (language === "ar" ? "إنشاء موعد جديد للمريض" : "Create a new appointment")}
+  </span>
+  <span className="text-[11px] text-gray-500">
+    {t.qaNewAppointmentDesc || (language === "ar" ? "تحديد وقت، طبيب، ونوع الاستشارة بسهولة وسرعة" : "Select time, doctor, and type of consultation quickly")}
+  </span>
+</button>
 
             {/* Confirm appointments */}
             <button
@@ -395,6 +390,24 @@ export default function ReceptionDashboard() {
               <span className="text-[11px] text-gray-500">
                 {t.qaDailyReportDesc ||
                   "إجمالي المبالغ المستلمة، عدد الفواتير المدفوعة وغير المدفوعة، وإجمالي النقدي والإلكتروني"}
+              </span>
+            </button>
+
+             {/* Appointment requests */}
+            <button
+              onClick={() => router.push("/reception/appointments/requests")}
+              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-emerald-50 hover:border-emerald-200 transition px-4 py-3 text-left"
+            >
+              <span className="text-xs font-semibold text-emerald-700">
+                {t.qaRequestsLabel || "طلبات المواعيد"}
+              </span>
+              <span className="text-sm font-medium text-gray-900">
+                {t.qaRequestsTitle ||
+                  "مراجعة الطلبات القادمة من البوابة الإلكترونية"}
+              </span>
+              <span className="text-[11px] text-gray-500">
+                {t.qaRequestsDesc ||
+                  "تدقيق التفاصيل وإرسال الطلب للطبيب المناسب للموافقة"}
               </span>
             </button>
           </div>

@@ -11,7 +11,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
-
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface AppointmentsResponse {
   appointments: Appointment[];
@@ -22,11 +22,11 @@ type ApiError = {
 };
 
 export default function DoctorAppointmentsPage() {
-  const { user, token, logout, clinic, isLoading } = useAuth();
+  const { user, token, isLoading } = useAuth();
   const { language } = useLanguage();
   const isArabic = language === "ar";
-    const searchParams = useSearchParams();
-    const router = useRouter();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
@@ -35,7 +35,7 @@ export default function DoctorAppointmentsPage() {
   );
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>(""); // yyyy-mm-dd
+  const [dateFilter, setDateFilter] = useState<string>(""); 
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
@@ -55,14 +55,13 @@ export default function DoctorAppointmentsPage() {
     if (!user || !token) return;
 
     try {
-      // Only show loading spinner on first load
       if (!hasLoaded.current) {
         setIsLoadingAppointments(true);
       }
-      
+
       setAppointmentsError(null);
 
-      const res = await fetch("/api/doctor/appointments", {
+      const res = await fetch("/api/doctor/appointments/requests", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -86,7 +85,6 @@ export default function DoctorAppointmentsPage() {
       setAppointments(data.appointments);
       hasLoaded.current = true;
     } catch (err: unknown) {
-      console.error("Error fetching appointments:", err);
       let message = isArabic
         ? "فشل في جلب المواعيد"
         : "Failed to fetch appointments";
@@ -133,12 +131,11 @@ export default function DoctorAppointmentsPage() {
           a.id === appointmentId ? { ...a, status: "approved" } : a
         )
       );
-      
+
       toast.success(isArabic ? "تم قبول الموعد بنجاح" : "Appointment approved successfully");
-      fetchAppointments(); // Background refresh
+      fetchAppointments();
 
     } catch (err: unknown) {
-      console.error("Error approving appointment:", err);
       let message = isArabic
         ? "فشل في قبول الموعد"
         : "Failed to approve appointment";
@@ -178,14 +175,11 @@ export default function DoctorAppointmentsPage() {
             (isArabic ? "فشل في رفض الموعد" : "Failed to reject appointment")
         );
 
-      console.log("Appointment rejected", data);
-
       setAppointments((prev) => prev.filter((a) => a.id !== appointmentId));
       toast.success(isArabic ? "تم رفض الموعد بنجاح" : "Appointment rejected successfully");
-      fetchAppointments(); // Background refresh
+      fetchAppointments();
 
     } catch (err) {
-      console.error("Error rejecting appointment:", err);
       toast.error(
         err instanceof Error
           ? err.message
@@ -232,8 +226,6 @@ export default function DoctorAppointmentsPage() {
         );
       }
 
-      console.log("Rescheduled successfully", json);
-
       setAppointments((prev) =>
         prev.map((a) =>
           a.id === id
@@ -246,21 +238,17 @@ export default function DoctorAppointmentsPage() {
             : a
         )
       );
-      
+
       toast.success(isArabic ? "تم إعادة جدولة الموعد بنجاح" : "Appointment rescheduled successfully");
-      fetchAppointments(); // Background refresh
+      fetchAppointments();
 
     } catch (err: unknown) {
-      console.error("Error rescheduling appointment:", err);
-
       const message =
         err instanceof Error
           ? err.message
           : isArabic
           ? "خطأ في إعادة جدولة الموعد"
           : "Error rescheduling appointment";
-
-      console.log(message);
       toast.error(message);
     }
   };
@@ -299,9 +287,10 @@ export default function DoctorAppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 " dir={isArabic ? "rtl" : "ltr"}>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-       
+    <div className="min-h-screen bg-slate-50" dir={isArabic ? "rtl" : "ltr"}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <Breadcrumbs />
+
         <PageHeader
           label={isArabic ? "إدارة مواعيدك" : "Manage your appointments"}
           title={
@@ -359,6 +348,4 @@ export default function DoctorAppointmentsPage() {
       </main>
     </div>
   );
-
-  
 }
