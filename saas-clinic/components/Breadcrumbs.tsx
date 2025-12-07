@@ -42,6 +42,8 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
     analytics: { en: 'Analytics', ar: 'التحليلات' },
     'add-staff': { en: 'Add Staff', ar: 'إضافة موظف' },
     'management-staff': { en: 'Management Staff', ar: 'إدارة الموظفين' },
+    register: { en: 'Register Patient', ar: 'تسجيل مريض' },
+    update: { en: 'Update Patient', ar: 'تحديث مريض' },
   };
 
   const generateBreadcrumbs = (): BreadcrumbItem[] => {

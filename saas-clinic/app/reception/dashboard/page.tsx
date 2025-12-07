@@ -313,7 +313,7 @@ export default function ReceptionDashboard() {
           <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* New patient */}
             <button
-              onClick={() => router.push("/reception/patients/new")}
+              onClick={() => router.push("/reception/patients/register")}
               className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-teal-50 hover:border-teal-200 transition px-4 py-3 text-left"
             >
               <span className="text-xs font-semibold text-teal-700">
@@ -344,6 +344,23 @@ export default function ReceptionDashboard() {
                   "البحث باستخدام رقم الهوية أو رقم الهاتف لفتح الملف الطبي"}
               </span>
             </button>
+
+            {/* Update patient */}
+            <button
+              onClick={() => router.push("/reception/patients/update")}
+              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-blue-50 hover:border-blue-200 transition px-4 py-3 text-left"
+            >
+              <span className="text-xs font-semibold text-blue-700">
+                {t.qaUpdatePatientLabel || (language === "ar" ? "تحديث بيانات مريض" : "Update Patient")}
+              </span>
+              <span className="text-sm font-medium text-gray-900">
+                {t.qaUpdatePatientTitle || (language === "ar" ? "تعديل معلومات مريض موجود" : "Edit existing patient information")}
+              </span>
+              <span className="text-[11px] text-gray-500">
+                {t.qaUpdatePatientDesc || (language === "ar" ? "تحديث الاسم، رقم الهاتف، العنوان وغيرها من المعلومات" : "Update name, phone, address and other details")}
+              </span>
+            </button>
+
             <button
   onClick={() => router.push("/reception/appointments/create")}
   className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 hover:bg-purple-100 hover:border-purple-300 transition px-4 py-3 text-left"
@@ -359,22 +376,7 @@ export default function ReceptionDashboard() {
   </span>
 </button>
 
-            {/* Confirm appointments */}
-            <button
-              onClick={() => router.push("/reception/appointments/manage")}
-              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-indigo-50 hover:border-indigo-200 transition px-4 py-3 text-left"
-            >
-              <span className="text-xs font-semibold text-indigo-700">
-                {t.qaConfirmLabel || "تأكيد المواعيد"}
-              </span>
-              <span className="text-sm font-medium text-gray-900">
-                {t.qaConfirmTitle || "اعتماد الموعد بعد موافقة الطبيب"}
-              </span>
-              <span className="text-[11px] text-gray-500">
-                {t.qaConfirmDesc ||
-                  "تحويل حالة الموعد إلى 'فعال' مع إرسال رسالة تأكيد للمريض"}
-              </span>
-            </button>
+            
 
             {/* Daily financial report */}
             <button
