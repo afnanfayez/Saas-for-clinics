@@ -209,12 +209,12 @@ export default function DoctorDashboard() {
 
           <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <QuickActionCard
-              label={isArabic ? "المواعيد القادمة" : "Appointments uncoming"}
-              title={isArabic ? "مواعيد القادمة" : " uncoming Schedule"}
+              label={isArabic ? "المواعيد القادمة" : "Upcoming Appointments"}
+              title={isArabic ? "المواعيد القادمة" : "Upcoming Schedule"}
               description={
                 isArabic
-                  ? "عرض جميع مواعيد اليوم"
-                  : "View all appointments uncoming"
+                  ? "عرض جميع المواعيد القادمة"
+                  : "View all upcoming appointments"
               }
               href="/doctor/upcoming-appointments"
               color="teal"
@@ -233,14 +233,14 @@ export default function DoctorDashboard() {
             />
 
             <QuickActionCard
-              label={isArabic ? "السجلات الطبية" : "Medical Records"}
-              title={isArabic ? "السجلات الطبية" : "Patient Records"}
+              label={isArabic ? "مواعيد اليوم" : "Today's Appointments"}
+              title={isArabic ? "مواعيد اليوم" : "Today's Schedule"}
               description={
                 isArabic
-                  ? "الوصول إلى السجلات الطبية"
-                  : "Access medical records"
+                  ? "عرض مواعيد اليوم والسجلات"
+                  : "View today's appointments and records"
               }
-              href="/doctor/medical-records"
+              href="/doctor/today-appointments"
               color="purple"
             />
 
@@ -250,7 +250,7 @@ export default function DoctorDashboard() {
               description={
                 isArabic ? "البحث في قاعدة البيانات" : "Search patient database"
               }
-              href="/doctor/patients"
+              href="/reception/patients/search"
               color="orange"
             />
           </div>
