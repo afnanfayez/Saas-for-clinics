@@ -12,6 +12,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useRoleGuard } from '@/lib/roleGuard';
+import { Building2, Users, UserCheck, DollarSign } from 'lucide-react';
 
 interface DashboardStats {
   total_clinics: number;
@@ -107,7 +108,7 @@ export default function PlatformDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <Breadcrumbs />
         <DashboardHero
@@ -130,21 +131,33 @@ export default function PlatformDashboard() {
             label={t.totalClinics || 'Total Clinics'}
             value={stats?.total_clinics || 0}
             sub={language === 'ar' ? 'عيادات مسجلة' : 'Registered clinics'}
+            icon={Building2}
+            color="teal"
+            loading={loadingStats}
           />
           <StatCard
             label={t.activeUsers || 'Active Users'}
             value={stats?.active_users || 0}
             sub={language === 'ar' ? 'مستخدمين نشطين' : 'Active users'}
+            icon={Users}
+            color="blue"
+            loading={loadingStats}
           />
           <StatCard
             label={t.totalPatients || 'Total Patients'}
             value={stats?.total_patients || 0}
             sub={language === 'ar' ? 'مرضى مسجلين' : 'Registered patients'}
+            icon={UserCheck}
+            color="purple"
+            loading={loadingStats}
           />
           <StatCard
             label={t.monthlyRevenue || 'Monthly Revenue'}
             value={`$${stats?.monthly_revenue || 0}`}
             sub={language === 'ar' ? 'إيرادات الشهر' : 'This month revenue'}
+            icon={DollarSign}
+            color="green"
+            loading={loadingStats}
           />
         </section>
 
@@ -155,10 +168,10 @@ export default function PlatformDashboard() {
         </section>
 
         {/* Quick Actions */}
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-          <div className="px-4 sm:px-5 py-3 border-b flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm transition-colors duration-300">
+          <div className="px-4 sm:px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {t.quickActions || (language === 'ar' ? 'الإجراءات السريعة' : 'Quick Actions')}
               </h3>
             </div>
@@ -168,15 +181,15 @@ export default function PlatformDashboard() {
             {/* Manage Clinics */}
             <button
               onClick={() => router.push('/platform/clinics')}
-              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-teal-50 hover:border-teal-200 transition px-4 py-3 text-left"
+              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 dark:border-slate-600 bg-gray-50/80 dark:bg-slate-700/50 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:border-teal-200 dark:hover:border-teal-700 transition px-4 py-3 text-left"
             >
-              <span className="text-xs font-semibold text-teal-700">
+              <span className="text-xs font-semibold text-teal-700 dark:text-teal-400">
                 {language === 'ar' ? 'إدارة العيادات' : 'Manage Clinics'}
               </span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {language === 'ar' ? 'عرض وإدارة جميع العيادات' : 'View and manage all clinics'}
               </span>
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[11px] text-gray-500 dark:text-slate-400">
                 {language === 'ar' ? 'تفعيل، تعطيل، وتحرير العيادات المسجلة' : 'Activate, deactivate, and edit registered clinics'}
               </span>
             </button>
@@ -184,15 +197,15 @@ export default function PlatformDashboard() {
             {/* View Reports */}
             <button
               onClick={() => router.push('/platform/reports')}
-              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-blue-50 hover:border-blue-200 transition px-4 py-3 text-left"
+              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 dark:border-slate-600 bg-gray-50/80 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-200 dark:hover:border-blue-700 transition px-4 py-3 text-left"
             >
-              <span className="text-xs font-semibold text-blue-700">
+              <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">
                 {language === 'ar' ? 'التقارير والإحصائيات' : 'Reports & Analytics'}
               </span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {language === 'ar' ? 'عرض تقارير المنصة المفصلة' : 'View detailed platform reports'}
               </span>
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[11px] text-gray-500 dark:text-slate-400">
                 {language === 'ar' ? 'تحليلات شاملة للأداء والإيرادات' : 'Comprehensive performance and revenue analytics'}
               </span>
             </button>
@@ -200,15 +213,15 @@ export default function PlatformDashboard() {
             {/* Platform Settings */}
             <button
               onClick={() => router.push('/platform/settings')}
-              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 bg-gray-50/80 hover:bg-purple-50 hover:border-purple-200 transition px-4 py-3 text-left"
+              className="flex flex-col items-start gap-1 rounded-2xl border border-gray-100 dark:border-slate-600 bg-gray-50/80 dark:bg-slate-700/50 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-200 dark:hover:border-purple-700 transition px-4 py-3 text-left"
             >
-              <span className="text-xs font-semibold text-purple-700">
+              <span className="text-xs font-semibold text-purple-700 dark:text-purple-400">
                 {language === 'ar' ? 'إعدادات المنصة' : 'Platform Settings'}
               </span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {language === 'ar' ? 'إدارة إعدادات النظام' : 'Manage system settings'}
               </span>
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[11px] text-gray-500 dark:text-slate-400">
                 {language === 'ar' ? 'تكوين المنصة والخطط والاشتراكات' : 'Configure platform, plans and subscriptions'}
               </span>
             </button>
@@ -216,58 +229,58 @@ export default function PlatformDashboard() {
         </section>
 
         {/* Recent Clinics Table */}
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-4 sm:px-5 py-3 border-b flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors duration-300">
+          <div className="px-4 sm:px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">{t.recentClinics || 'Recent Clinics'}</h3>
-              <p className="text-[11px] text-gray-500">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t.recentClinics || 'Recent Clinics'}</h3>
+              <p className="text-[11px] text-gray-500 dark:text-slate-400">
                 {language === 'ar' ? 'آخر العيادات المسجلة' : 'Latest registered clinics'}
               </p>
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-slate-700">
                 <tr>
-                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">{t.clinicName || 'Clinic Name'}</th>
-                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">{t.location || 'Location'}</th>
-                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">{t.status || 'Status'}</th>
-                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">{t.users || 'Users'}</th>
-                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">{t.joinedDate || 'Joined Date'}</th>
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">{t.clinicName || 'Clinic Name'}</th>
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">{t.location || 'Location'}</th>
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">{t.status || 'Status'}</th>
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">{t.users || 'Users'}</th>
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">{t.joinedDate || 'Joined Date'}</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                 {loadingStats ? (
                   <tr>
-                    <td colSpan={5} className="px-4 sm:px-5 py-8 text-center text-sm text-gray-500">
+                    <td colSpan={5} className="px-4 sm:px-5 py-8 text-center text-sm text-gray-500 dark:text-slate-400">
                       Loading...
                     </td>
                   </tr>
                 ) : stats?.recent_clinics && stats.recent_clinics.length > 0 ? (
                   stats.recent_clinics.map((clinic) => (
-                    <tr key={clinic.id} className="hover:bg-gray-50 transition">
+                    <tr key={clinic.id} className="hover:bg-gray-50 dark:hover:bg-slate-700 transition">
                       <td className="px-4 sm:px-5 py-3 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">{clinic.name}</div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{clinic.name}</div>
                       </td>
-                      <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-xs text-gray-500">{clinic.location}</td>
+                      <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-slate-400">{clinic.location}</td>
                       <td className="px-4 sm:px-5 py-3 whitespace-nowrap">
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           clinic.status === 'Active' 
-                            ? 'bg-emerald-50 text-emerald-700' 
-                            : 'bg-amber-50 text-amber-700'
+                            ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' 
+                            : 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400'
                         }`}>
                           {clinic.status}
                         </span>
                       </td>
-                      <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-xs text-gray-500">{clinic.users_count}</td>
-                      <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-xs text-gray-500">
+                      <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-slate-400">{clinic.users_count}</td>
+                      <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-slate-400">
                         {new Date(clinic.created_at).toLocaleDateString()}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-4 sm:px-5 py-8 text-center text-sm text-gray-500">
+                    <td colSpan={5} className="px-4 sm:px-5 py-8 text-center text-sm text-gray-500 dark:text-slate-400">
                       No clinics found
                     </td>
                   </tr>
