@@ -106,7 +106,7 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
   if (breadcrumbs.length === 0) return null;
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4" aria-label="Breadcrumb">
+    <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-4 transition-colors" aria-label="Breadcrumb">
       {breadcrumbs.map((crumb, index) => (
         <div key={`${crumb.href || crumb.label}-${index}`} className="flex items-center">
           {index > 0 && (
@@ -120,9 +120,9 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
             </svg>
           )}
           {index === breadcrumbs.length - 1 || crumb.href === null ? (
-            <span className="font-medium text-gray-900">{crumb.label}</span>
+            <span className="font-medium text-gray-900 dark:text-white">{crumb.label}</span>
           ) : (
-            <button onClick={() => crumb.href && router.push(crumb.href)} className="hover:text-teal-600 transition-colors">
+            <button onClick={() => crumb.href && router.push(crumb.href)} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
               {crumb.label}
             </button>
           )}
