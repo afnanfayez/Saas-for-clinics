@@ -22,6 +22,7 @@ interface PatientSearchProps {
   autoNavigate?: boolean;
   showSelectedCard?: boolean;
   className?: string;
+  onSearchStart?: () => void;
 }
 
 export default function PatientSearch({
@@ -29,6 +30,7 @@ export default function PatientSearch({
   autoNavigate = false,
   showSelectedCard = true,
   className = "",
+  onSearchStart,
 }: PatientSearchProps) {
   const { language } = useLanguage();
   const router = useRouter();
@@ -194,6 +196,11 @@ export default function PatientSearch({
     setError(null);
     setNoResults(false);
     setRetryable(false);
+
+    // Notify parent component that search has started
+    if (onSearchStart) {
+      onSearchStart();
+    }
   };
 
   const handleRetry = () => {
@@ -369,7 +376,7 @@ export default function PatientSearch({
                       </button>
                     )}
                   </div>
-                  
+
                   {/* Create New Patient Button */}
                   <div className="pt-3 border-t border-slate-200">
                     <p className="text-xs text-slate-600 mb-2">
