@@ -84,57 +84,57 @@ export function AppointmentTable({
 
   if (isLoading)
     return (
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600 dark:text-gray-400">
         {isArabic ? "جاري تحميل المواعيد..." : "Loading appointments..."}
       </div>
     );
 
-  if (error) return <div className="text-red-600 text-sm">{error}</div>;
+  if (error) return <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>;
 
   if (!appointments.length)
     return (
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-gray-500 dark:text-gray-400">
         {isArabic ? "لا توجد مواعيد." : "No appointments found."}
       </div>
     );
 
   return (
     <>
-      <div className="overflow-x-auto rounded-xl border border-slate-200">
-        <table className="min-w-full text-sm text-black">
-          <thead className="bg-slate-50">
-            <tr className="border-b">
-              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        <table className="min-w-full text-sm">
+          <thead className="bg-slate-50 dark:bg-slate-700">
+            <tr className="border-b dark:border-slate-600">
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 dark:text-slate-300 text-center">
                 {isArabic ? "المريض" : "Patient"}
               </th>
-              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 dark:text-slate-300 text-center">
                 {isArabic ? "التاريخ والوقت" : "Date & Time"}
               </th>
-              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 dark:text-slate-300 text-center">
                 {isArabic ? "الحالة" : "Status"}
               </th>
-              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 text-center">
+              <th className="py-2.5 px-3 text-xs font-semibold text-slate-600 dark:text-slate-300 text-center">
                 {isArabic ? "الإجراءات" : "Actions"}
               </th>
             </tr>
           </thead>
           <tbody>
             {appointments.map((appt) => (
-              <tr key={appt.id} className="border-b last:border-0">
+              <tr key={appt.id} className="border-b last:border-0 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                 <td className="py-3 px-3 align-middle text-center">
-                  <div className="font-medium">{appt.patientName}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="font-medium text-slate-900 dark:text-white">{appt.patientName}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     {appt.patientPhone ?? ""}
                   </div>
                 </td>
-                <td className="py-3 px-3 align-middle text-center">
+                <td className="py-3 px-3 align-middle text-center text-slate-700 dark:text-slate-300">
                   {appt.dateTime
                     ? new Date(appt.dateTime).toLocaleString(
                       
                       )
                     : "-"}
                 </td>
-                <td className="py-3 px-3 align-middle text-center capitalize">
+                <td className="py-3 px-3 align-middle text-center capitalize text-slate-700 dark:text-slate-300">
                   {appt.status}
                 </td>
                 <td className="py-3 px-3 align-middle">
@@ -161,7 +161,7 @@ export function AppointmentTable({
                     </div>
                   ) : (
                     <div className="flex justify-center">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {isArabic
                           ? "لا توجد إجراءات على هذه الحالة."
                           : "No actions for this status."}
@@ -177,18 +177,18 @@ export function AppointmentTable({
 
       {/* Reject Modal */}
       {isRejectOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
-            <h2 className="text-lg font-semibold mb-3 text-gray-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-5 transition-colors">
+            <h2 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
               {isArabic ? "سبب رفض الموعد" : "Appointment rejection reason"}
             </h2>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
               {isArabic
                 ? "اكتب السبب الذي سيتم إرساله للمريض أو حفظه في السجل."
                 : "Write the reason that will be sent to the patient or saved in the record."}
             </p>
             <textarea
-              className="w-full border border-slate-200 rounded-lg text-sm p-3 text-slate-700 min-h-[100px] mb-4 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 resize-none"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg text-sm p-3 text-slate-700 dark:text-slate-200 min-h-[100px] mb-4 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 resize-none"
               placeholder={
                 isArabic
                   ? "اكتب سبب الرفض هنا..."
@@ -200,7 +200,7 @@ export function AppointmentTable({
             <div className="flex justify-end gap-2">
               <button
                 onClick={closeRejectModal}
-                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
+                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
               >
                 {isArabic ? "إلغاء" : "Cancel"}
               </button>
@@ -218,26 +218,26 @@ export function AppointmentTable({
 
       {/* Reschedule Modal */}
       {isRescheduleOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
-            <h2 className="text-lg font-semibold mb-3 text-gray-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-5 transition-colors">
+            <h2 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
               {isArabic ? "إعادة جدولة الموعد" : "Reschedule appointment"}
             </h2>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
               {isArabic
                 ? "اختر تاريخ ووقت جديدين لهذا الموعد."
                 : "Choose a new date and time for this appointment."}
             </p>
             <input
               type="datetime-local"
-              className="w-full border border-slate-200 rounded-lg text-sm p-3 mb-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all duration-200"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 rounded-lg text-sm p-3 mb-4 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all duration-200"
               value={rescheduleDateTime}
               onChange={(e) => setRescheduleDateTime(e.target.value)}
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={closeRescheduleModal}
-                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
+                className="px-4 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/20"
               >
                 {isArabic ? "إلغاء" : "Cancel"}
               </button>
