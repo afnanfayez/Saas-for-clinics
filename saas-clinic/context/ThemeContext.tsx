@@ -14,51 +14,41 @@ const ThemeContext = createContext<ThemeContextProps>({
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const updateTextColors = (isDarkTheme: boolean) => {
-    const elements = document.querySelectorAll("body *");
-
-    elements.forEach((el) => {
-      const style = window.getComputedStyle(el);
-      const color = style.color;
-
-      const match = color.match(/\d+/g);
-      if (!match) return;
-
-      const [r, g, b] = match.map(Number);
-
-      const isAlmostBlack = r < 40 && g < 40 && b < 40;
-
-      if (isDarkTheme) {
-        if (isAlmostBlack) {
-          el.classList.add("black-to-white");
-        }
-      } else {
-        el.classList.remove("black-to-white");
-      }
-    });
+  // تطبيق الثيم على عنصر HTML
+  const applyTheme = (dark: boolean) => {
+    if (dark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   const toggleDark = () => {
     const newTheme = !isDark;
-
     setIsDark(newTheme);
     localStorage.setItem("theme", newTheme ? "dark" : "light");
-
-    document.body.classList.toggle("night-mode", newTheme);
-    setTimeout(() => updateTextColors(newTheme), 30);
+    applyTheme(newTheme);
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-
-    if (saved === "dark") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- initialize persisted theme after hydration
-      setIsDark(true);
-      document.body.classList.add("night-mode");
-      setTimeout(() => updateTextColors(true), 30);
-    }
+    setMounted(true);
+    
+    // التحقق من الثيم المحفوظ أو تفضيل النظام
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    
+    setIsDark(shouldBeDark);
+    applyTheme(shouldBeDark);
   }, []);
+
+  // منع flash of unstyled content
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleDark }}>
