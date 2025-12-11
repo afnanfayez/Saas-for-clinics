@@ -29,21 +29,21 @@ export default function MedicalRecordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         <Breadcrumbs />
 
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs text-slate-500 mb-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
               {language === "ar" ? "السجل الطبي" : "Medical record"}
             </p>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               {language === "ar"
                 ? "سجلك الطبي وزياراتك السابقة"
                 : "Your medical record and previous visits"}
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               {language === "ar"
                 ? "هنا يمكنك مشاهدة ملخص لزياراتك السابقة والتشخيصات."
                 : "Here you can view a summary of your previous visits and diagnoses."}
@@ -51,7 +51,7 @@ export default function MedicalRecordPage() {
           </div>
           <button
             onClick={() => router.push("/patient/dashboard")}
-            className="text-sm text-teal-700 hover:text-teal-800 hover:underline"
+            className="text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline"
           >
             {language === "ar" ? "عودة" : "Back"}
           </button>

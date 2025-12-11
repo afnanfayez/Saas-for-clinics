@@ -142,8 +142,8 @@ export default function DoctorDashboard() {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 dark:border-teal-400" />
       </div>
     );
   }
@@ -151,13 +151,19 @@ export default function DoctorDashboard() {
   const firstName = user.name?.split(" ")[1] || user.name;
 
   return (
-    <div className="min-h-screen bg-slate-50" dir={isArabic ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300" dir={isArabic ? "rtl" : "ltr"}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <Breadcrumbs />
 
         <DashboardHero
-          title={isArabic ? `أهلاً د. ${firstName} 👋` : `Hello Dr. ${firstName} 👋`}
-          subtitle={isArabic ? "مرحباً بعودتك إلى العيادة" : "Welcome back to your clinic"}
+          title={
+            isArabic ? `أهلاً د. ${firstName} 👋` : `Hello Dr. ${firstName} 👋`
+          }
+          subtitle={
+            isArabic
+              ? "مرحباً بعودتك إلى العيادة"
+              : "Welcome back to your clinic"
+          }
           description={
             isArabic
               ? "هنا يمكنك مراجعة مواعيد اليوم، طلبات المرضى، والمهام العاجلة بسرعة."
@@ -166,36 +172,36 @@ export default function DoctorDashboard() {
           primaryAction={
             <button
               onClick={() => router.push("/doctor/today-appointments/")}
-              className="mt-3 inline-flex items-center px-4 py-2.5 rounded-xl bg-white text-teal-700 text-xs font-semibold shadow-sm hover:bg-teal-50"
+              className="mt-3 inline-flex items-center px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-teal-700 dark:text-teal-400 text-xs font-semibold shadow-sm hover:bg-teal-50 dark:hover:bg-slate-700 transition-colors"
             >
               {isArabic ? "عرض جدول اليوم" : "View today's schedule"}
             </button>
           }
         />
 
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 sm:p-5 transition-colors duration-300">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-slate-900">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
               {isArabic ? "نظرة عامة على اليوم" : "Today's overview"}
             </h3>
           </div>
           <DoctorStats appointments={appointments} />
 
           {isLoadingAppointments && (
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               {isArabic ? "جاري تحميل المواعيد..." : "Loading appointments..."}
             </p>
           )}
           {appointmentsError && (
-            <p className="mt-2 text-xs text-red-600">{appointmentsError}</p>
+            <p className="mt-2 text-xs text-red-600 dark:text-red-400">{appointmentsError}</p>
           )}
         </section>
 
         {/* Quick Actions */}
-        <section className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <div className="px-4 sm:px-5 py-3 border-b flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-colors duration-300">
+          <div className="px-4 sm:px-5 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {isArabic ? "الإجراءات السريعة" : "Quick Actions"}
               </h3>
             </div>
@@ -203,34 +209,48 @@ export default function DoctorDashboard() {
 
           <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <QuickActionCard
-              label={isArabic ? "مواعيد اليوم" : "Today's Appointments"}
-              title={isArabic ? "مواعيد اليوم" : "Today's Schedule"}
-              description={isArabic ? "عرض جميع مواعيد اليوم" : "View all today's appointments"}
-              href="/doctor/today-appointments"
+              label={isArabic ? "المواعيد القادمة" : "Upcoming Appointments"}
+              title={isArabic ? "المواعيد القادمة" : "Upcoming Schedule"}
+              description={
+                isArabic
+                  ? "عرض جميع المواعيد القادمة"
+                  : "View all upcoming appointments"
+              }
+              href="/doctor/upcoming-appointments"
               color="teal"
             />
-            
+
             <QuickActionCard
               label={isArabic ? "طلبات المواعيد" : "Appointment Requests"}
               title={isArabic ? "طلبات المواعيد" : "Pending Requests"}
-              description={isArabic ? "مراجعة وإدارة الطلبات" : "Review and manage requests"}
+              description={
+                isArabic
+                  ? "مراجعة وإدارة الطلبات"
+                  : "Review and manage requests"
+              }
               href="/doctor/appointments"
               color="blue"
             />
 
             <QuickActionCard
-              label={isArabic ? "السجلات الطبية" : "Medical Records"}
-              title={isArabic ? "السجلات الطبية" : "Patient Records"}
-              description={isArabic ? "الوصول إلى السجلات الطبية" : "Access medical records"}
-              href="/doctor/medical-records"
+              label={isArabic ? "مواعيد اليوم" : "Today's Appointments"}
+              title={isArabic ? "مواعيد اليوم" : "Today's Schedule"}
+              description={
+                isArabic
+                  ? "عرض مواعيد اليوم والسجلات"
+                  : "View today's appointments and records"
+              }
+              href="/doctor/today-appointments"
               color="purple"
             />
 
             <QuickActionCard
               label={isArabic ? "البحث عن مريض" : "Search Patient"}
               title={isArabic ? "البحث عن مريض" : "Find Patient"}
-              description={isArabic ? "البحث في قاعدة البيانات" : "Search patient database"}
-              href="/doctor/patients"
+              description={
+                isArabic ? "البحث في قاعدة البيانات" : "Search patient database"
+              }
+              href="/reception/patients/search"
               color="orange"
             />
           </div>

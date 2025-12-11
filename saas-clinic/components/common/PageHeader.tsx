@@ -28,9 +28,9 @@ export default function PageHeader({
     <header className={wrapperClass}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-6 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs text-slate-500 mb-1">{label}</p>
-          <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
-          <p className="text-sm text-slate-500 mt-1">{description}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{label}</p>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{title}</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{description}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -39,7 +39,7 @@ export default function PageHeader({
           {backAction && (
             <button
               onClick={backAction}
-              className="text-sm text-teal-700 hover:text-teal-800 hover:underline"
+              className="text-sm text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline"
             >
               {isArabic ? "رجوع" : "Back"}
             </button>
