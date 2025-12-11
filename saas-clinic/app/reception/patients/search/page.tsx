@@ -6,6 +6,7 @@ import { translations } from "@/lib/translations";
 import { useRouter } from "next/navigation";
 import PatientSearch, { LookupPatient } from "@/components/PatientSearch";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SearchPatientPage() {
   const { language } = useLanguage();
@@ -32,8 +33,12 @@ export default function SearchPatientPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 py-8 px-4 transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
+        
         <Breadcrumbs />
 
         <div className="mb-6 flex items-center justify-between gap-3">
