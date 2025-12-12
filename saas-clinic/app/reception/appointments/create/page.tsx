@@ -141,7 +141,7 @@ export default function CreateAppointmentPage() {
 
         </div>
 
-        <div className=" grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Patient Search Section */}
           <div>
             <div className="mb-4">
@@ -215,6 +215,7 @@ export default function CreateAppointmentPage() {
               <PreviousVisits
                 patientId={selectedPatient.patientId}
                 showSummary
+                limit={4}
               />
             </div>
           )}
