@@ -5,15 +5,9 @@ import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
 import { Appointment } from "@/types/appointment";
 import { useLanguage } from "@/context/LanguageContext";
-<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
-=======
-import { useRouter } from "next/navigation";
-import PageHeader from "@/components/common/PageHeader";
-import Breadcrumbs from "@/components/Breadcrumbs";
->>>>>>> 001227a183d7d5b6801eea3e69499d1eb557e537
 
 interface AppointmentsResponse {
   appointments: Appointment[];
@@ -57,7 +51,7 @@ export default function DoctorUpcomingAppointmentsPage() {
         throw new Error(
           (json as ApiError).message ||
             (json as ApiError).error ||
-            (isArabic ? "فشل في جلب المواعيد" : "Failed to fetch appointments")
+            (isArabic ? "U?O'U, U?US OªU,O\" OU,U.U^OO1USO_" : "Failed to fetch appointments")
         );
       }
 
@@ -69,7 +63,7 @@ export default function DoctorUpcomingAppointmentsPage() {
         err instanceof Error
           ? err.message
           : isArabic
-          ? "فشل في جلب المواعيد"
+          ? "U?O'U, U?US OªU,O\" OU,U.U^OO1USO_"
           : "Failed to fetch appointments";
       setAppointmentsError(message);
       toast.error(message);
@@ -97,7 +91,6 @@ export default function DoctorUpcomingAppointmentsPage() {
       const isFutureOrToday = apptDate >= todayMidnight;
       const isApproved = appt.status?.toLowerCase() === "approved";
 
-      // تفادي الـ any
       const createdByDoctor =
         (
           appt as {
@@ -134,72 +127,44 @@ export default function DoctorUpcomingAppointmentsPage() {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-slate-50" dir={isArabic ? "rtl" : "ltr"}>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Breadcrumbs
-          customItems={[
-            { label: isArabic ? "الطبيب" : "Doctor", href: "/doctor/dashboard" },
-            {
-              label: isArabic ? "لوحة التحكم" : "Dashboard",
-              href: "/doctor/dashboard",
-            },
-            {
-              label: isArabic ? "المواعيد القادمة" : "Upcoming appointments",
-              href: null,
-            },
-          ]}
-        />
-        <PageHeader
-=======
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900" dir={isArabic ? "rtl" : "ltr"}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Breadcrumbs
           customItems={[
-            { label: isArabic ? "الطبيب" : "Doctor", href: "/doctor/dashboard" },
+            { label: isArabic ? "OU,OúO\"USO\"" : "Doctor", href: "/doctor/dashboard" },
             {
-              label: isArabic ? "لوحة التحكم" : "Dashboard",
+              label: isArabic ? "U,U^O-Oc OU,O¦O-UŸU." : "Dashboard",
               href: "/doctor/dashboard",
             },
             {
-              label: isArabic ? "المواعيد القادمة" : "Upcoming appointments",
+              label: isArabic ? "OU,U.U^OO1USO_ OU,U,OO_U.Oc" : "Upcoming appointments",
               href: null,
             },
           ]}
         />
         <PageHeader
->>>>>>> 001227a183d7d5b6801eea3e69499d1eb557e537
-          label={isArabic ? "مواعيدك القادمة" : "Your upcoming appointments"}
+          label={isArabic ? "U.U^OO1USO_UŸ OU,U,OO_U.Oc" : "Your upcoming appointments"}
           title={
             isArabic
-              ? "المواعيد القادمة (المقبولة أو المحجوزة من الطبيب)"
+              ? "OU,U.U^OO1USO_ OU,U,OO_U.Oc (OU,U.U,O\"U^U,Oc OœU^ OU,U.O-OªU^OýOc U.U+ OU,OúO\"USO\")"
               : "Upcoming appointments (approved or created by you)"
           }
           description={
             isArabic
-              ? "عرض المواعيد القادمة التي تم الموافقة عليها أو التي قمت بحجزها بنفسك."
+              ? "O1OñO OU,U.U^OO1USO_ OU,U,OO_U.Oc OU,O¦US O¦U. OU,U.U^OU?U,Oc O1U,USUØO OœU^ OU,O¦US U,U.O¦ O\"O-OªOýUØO O\"U+U?O3UŸ."
               : "View upcoming appointments that are approved or were created by the doctor."
           }
           backAction={() => router.push("/doctor/dashboard")}
         />
 
-<<<<<<< HEAD
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 mt-6">
-          <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
-            <h3 className="text-sm font-semibold text-slate-900">
-              {isArabic ? "المواعيد القادمة" : "Upcoming appointments"}
-            </h3>
-            <p className="text-[11px] text-slate-500">
-=======
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mt-6">
           <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-700">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              {isArabic ? "المواعيد القادمة" : "Upcoming appointments"}
+              {isArabic ? "OU,U.U^OO1USO_ OU,U,OO_U.Oc" : "Upcoming appointments"}
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
->>>>>>> 001227a183d7d5b6801eea3e69499d1eb557e537
               {isArabic
-                ? "هذه الصفحة تعرض المواعيد المستقبلية الموافق عليها أو المحجوزة من قبل الطبيب."
+                ? "UØOøUØ OU,OæU?O-Oc O¦O1OñO OU,U.U^OO1USO_ OU,U.O3O¦U,O\"U,USOc OU,U.U^OU?U, O1U,USUØO OœU^ OU,U.O-OªU^OýOc U.U+ U,O\"U, OU,OúO\"USO\"."
                 : "This page shows future appointments that are approved or created by the doctor."}
             </p>
             {appointmentsError && (
@@ -217,33 +182,28 @@ export default function DoctorUpcomingAppointmentsPage() {
             ) : upcomingAppointments.length === 0 ? (
               <p className="text-slate-500 text-sm text-center py-10">
                 {isArabic
-                  ? "لا يوجد مواعيد قادمة حالياً."
+                  ? "U,O USU^OªO_ U.U^OO1USO_ U,OO_U.Oc O-OU,USOU<."
                   : "No upcoming appointments."}
               </p>
             ) : (
               <div className="overflow-x-auto">
-<<<<<<< HEAD
-                <table className="min-w-full border border-slate-200 text-black rounded-xl overflow-hidden">
-                  <thead className="bg-slate-100 text-slate-700 text-sm">
-=======
                 <table className="min-w-full border border-slate-200 dark:border-slate-700 text-black dark:text-white rounded-xl overflow-hidden">
                   <thead className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm">
->>>>>>> 001227a183d7d5b6801eea3e69499d1eb557e537
                     <tr>
                       <th className="px-4 py-2 text-start">
-                        {isArabic ? "المريض" : "Patient"}
+                        {isArabic ? "OU,U.OñUSO" : "Patient"}
                       </th>
                       <th className="px-4 py-2 text-start">
-                        {isArabic ? "الهاتف" : "Phone"}
+                        {isArabic ? "OU,UØOO¦U?" : "Phone"}
                       </th>
                       <th className="px-4 py-2 text-start">
-                        {isArabic ? "التاريخ" : "Date"}
+                        {isArabic ? "OU,O¦OOñUSOr" : "Date"}
                       </th>
                       <th className="px-4 py-2 text-start">
-                        {isArabic ? "الوقت" : "Time"}
+                        {isArabic ? "OU,U^U,O¦" : "Time"}
                       </th>
                       <th className="px-4 py-2 text-start">
-                        {isArabic ? "الحالة" : "Status"}
+                        {isArabic ? "OU,O-OU,Oc" : "Status"}
                       </th>
                     </tr>
                   </thead>
@@ -261,19 +221,11 @@ export default function DoctorUpcomingAppointmentsPage() {
                         : "-";
 
                       return (
-<<<<<<< HEAD
-                        <tr key={appt.id} className="hover:bg-slate-50">
-                          <td className="px-4 py-2 font-medium">
-                            {appt.patientName}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-slate-600">
-=======
                         <tr key={appt.id} className="hover:bg-slate-50 dark:hover:bg-slate-700">
                           <td className="px-4 py-2 font-medium">
                             {appt.patientName}
                           </td>
                           <td className="px-4 py-2 text-sm text-slate-600 dark:text-slate-300">
->>>>>>> 001227a183d7d5b6801eea3e69499d1eb557e537
                             {appt.patientPhone || "-"}
                           </td>
                           <td className="px-4 py-2 text-sm">{date}</td>
