@@ -18,6 +18,7 @@ export default function Header() {
   const t = translations[language as keyof typeof translations];
 
   const navLinks = [
+    { key: "home", href: "#home" },
     { key: "whyUs", href: "#why-us" },
     { key: "features", href: "#features" },
     { key: "easyFast", href: "#easy" },

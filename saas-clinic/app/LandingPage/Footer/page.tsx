@@ -12,6 +12,7 @@ export default function Footer() {
   const t = translations[language as keyof typeof translations];
 
   const quickLinks = [
+    { key: "home", href: "#home" },
     { key: "whyUs", href: "#why-us" },
     { key: "features", href: "#features" },
     { key: "easyFast", href: "#easy" },
@@ -26,10 +27,9 @@ export default function Footer() {
             <img src="/assets/logo.png" alt="Your Clinic Logo" />
             <h2 className="footer-title">{t.yourClinic}</h2>
           </Link>
-       <p className="footer-copy">
-  &copy; {new Date().getFullYear()} {t.yourClinic}. {t.rightsReserved}
-</p>
-
+          <p className="footer-copy">
+            &copy; {new Date().getFullYear()} {t.yourClinic}. {t.rightsReserved}
+          </p>
         </div>
 
         <div className="footer-links">
