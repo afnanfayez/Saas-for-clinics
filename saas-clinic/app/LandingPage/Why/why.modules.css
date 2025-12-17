@@ -1,4 +1,3 @@
-
 .why-us-section {
   padding: 6rem 1.5rem;
   text-align: center;
@@ -7,23 +6,24 @@
 }
 
 .why-us-section.night-mode {
-background-color: var(--color-slate-800);
+  background-color: var(--color-slate-800);
   color: #f9fafb;
 }
-.section-Why{
-    display:flex;
-    justify-content:center;
-    flex-direction: column;
+.section-Why {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 .section-header {
   max-width: 800px;
-  margin: 0 auto 4rem auto; 
+  margin: 0 auto 4rem auto;
 }
 
 .section-title {
   font-size: 3rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  color: var(--color-gray-900);
 }
 
 .why-us-section.night-mode .section-title {
@@ -56,7 +56,7 @@ background-color: var(--color-slate-800);
 }
 
 .why-us-section.night-mode .card {
-  background-color: #162034
+  background-color: #162034;
 }
 
 .card:hover {
@@ -92,12 +92,17 @@ background-color: var(--color-slate-800);
 @media (max-width: 1024px) {
   .section-title {
     font-size: 2.5rem;
+    color: var(--color-gray-900);
   }
-  
+
+  .why-us-section.night-mode .section-title {
+    color: white;
+  }
+
   .section-subtitle {
     font-size: 1.1rem;
   }
-  
+
   .cards {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
@@ -108,37 +113,42 @@ background-color: var(--color-slate-800);
   .why-us-section {
     padding: 4rem 1rem;
   }
-  
+
   .section-header {
     margin-bottom: 3rem;
   }
-  
+
   .section-title {
     font-size: 2rem;
+    color: var(--color-gray-900);
   }
-  
+
+  .why-us-section.night-mode .section-title {
+    color: white;
+  }
+
   .section-subtitle {
     font-size: 1rem;
   }
-  
+
   .cards {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 0;
   }
-  
+
   .card {
     padding: 1.5rem 1.25rem;
   }
-  
+
   .card-title {
     font-size: 1.3rem;
   }
-  
+
   .card-desc {
     font-size: 1rem;
   }
-  
+
   .card-icon {
     margin-bottom: 1rem;
   }
@@ -148,23 +158,28 @@ background-color: var(--color-slate-800);
   .why-us-section {
     padding: 3rem 0.75rem;
   }
-  
+
   .section-title {
     font-size: 1.75rem;
+    color: var(--color-gray-900);
   }
-  
+
+  .why-us-section.night-mode .section-title {
+    color: white;
+  }
+
   .section-subtitle {
     font-size: 0.95rem;
   }
-  
+
   .card {
     padding: 1.25rem 1rem;
   }
-  
+
   .card-title {
     font-size: 1.2rem;
   }
-  
+
   .card-desc {
     font-size: 0.95rem;
   }

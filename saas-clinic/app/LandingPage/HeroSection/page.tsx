@@ -12,7 +12,7 @@ export default function HeroSection() {
   const t = translations[language as keyof typeof translations];
 
   return (
-    <section className={`hero-section ${isDark ? "night-mode" : ""}`}>
+    <section id="home" className={`hero-section ${isDark ? "night-mode" : ""}`}>
       <div className="hero-overlay"></div>
 
       <div className="hero-content ">

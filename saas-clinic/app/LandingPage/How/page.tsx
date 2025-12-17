@@ -20,11 +20,11 @@ export default function EasyStepsParallaxSection() {
   return (
     <section
       id="easy"
-      className={` easy-steps-parallax-section ${isDark ? "night-mode" : ""}`}
+      className={`easy-steps-parallax-section ${isDark ? "night-mode" : ""}`}
     >
-      <div className="overlay">
+      <div className="section-container">
         <div className="steps-header">
-          <h2 className="section-title">{t.easyFast}</h2>
+          <h2 className="section-title">{t.easy_Fast}</h2>
           <p className="section-subtitle">{t.easyFastSubtitle}</p>
         </div>
         <div className="steps-container">
