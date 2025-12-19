@@ -24,6 +24,9 @@ const doctorSchema = baseStaffSchema.extend({
   specialization: z.string().min(1, 'Specialization is required').max(100),
   available_days: z.string().min(1, 'Available days is required'),
   clinic_room: z.string().min(1, 'Clinic room is required').max(50),
+  start_time: z.string().min(1, 'Start time is required'),
+  end_time: z.string().min(1, 'End time is required'),
+  slot_duration: z.coerce.number().min(5, 'Minimum 5 minutes').max(120, 'Maximum 120 minutes'),
 });
 
 // Secretary schema
@@ -54,12 +57,20 @@ export default function AddStaffPage() {
     resolver: zodResolver(staffSchema),
     defaultValues: {
       role: 'Secretary',
+      start_time: '09:00',
+      end_time: '17:00',
+      slot_duration: 15,
     },
   });
 
   const handleRoleChange = (role: 'Doctor' | 'Secretary') => {
     setSelectedRole(role);
-    reset({ role });
+    reset({
+      role,
+      start_time: '09:00',
+      end_time: '17:00',
+      slot_duration: 15,
+    });
   };
 
   const onSubmit = async (data: StaffFormData) => {
@@ -68,15 +79,13 @@ export default function AddStaffPage() {
 
     try {
       // Adjust endpoint based on your backend API
-      const endpoint = data.role === 'Doctor' ? '/clinic/doctors' : '/clinic/secretaries';
+      const endpoint = data.role === 'Doctor' ? '/manager/doctors' : '/manager/secretaries';
       
-      const response = await apiClient.post(endpoint, data);
+      await apiClient.post(endpoint, data);
 
       // Success - redirect back to clinic dashboard with success message
       router.push('/clinic/dashboard?success=Staff member added successfully');
     } catch (err: unknown) {
-      console.error('Staff creation error:', err);
-      
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status?: number; data?: { message?: string; errors?: Record<string, string[]> } } };
         const status = axiosError.response?.status;
@@ -282,6 +291,63 @@ export default function AddStaffPage() {
                       <p className="mt-1 text-xs text-gray-500">
                         {t.availableDaysExample}
                       </p>
+                    </div>
+
+                    {/* Start Time */}
+                    <div>
+                      <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 mb-2">
+                        {t.startTime || 'Start time'} <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="start_time"
+                        type="time"
+                        {...register('start_time')}
+                        className={`block w-full px-4 py-3 border ${
+                          errors.start_time ? 'border-red-300' : 'border-gray-300'
+                        } rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-gray-900`}
+                      />
+                      {errors.start_time && (
+                        <p className="mt-1 text-sm text-red-600">{errors.start_time.message}</p>
+                      )}
+                    </div>
+
+                    {/* End Time */}
+                    <div>
+                      <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-2">
+                        {t.endTime || 'End time'} <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="end_time"
+                        type="time"
+                        {...register('end_time')}
+                        className={`block w-full px-4 py-3 border ${
+                          errors.end_time ? 'border-red-300' : 'border-gray-300'
+                        } rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-gray-900`}
+                      />
+                      {errors.end_time && (
+                        <p className="mt-1 text-sm text-red-600">{errors.end_time.message}</p>
+                      )}
+                    </div>
+
+                    {/* Slot Duration */}
+                    <div>
+                      <label htmlFor="slot_duration" className="block text-sm font-medium text-gray-700 mb-2">
+                        {t.slotDuration || 'Slot duration (mins)'} <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="slot_duration"
+                        type="number"
+                        min={5}
+                        max={120}
+                        {...register('slot_duration', { valueAsNumber: true })}
+                        className={`block w-full px-4 py-3 border ${
+                          errors.slot_duration ? 'border-red-300' : 'border-gray-300'
+                        } rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors text-gray-900`}
+                        placeholder="15"
+                      />
+                      {errors.slot_duration && (
+                        <p className="mt-1 text-sm text-red-600">{errors.slot_duration.message}</p>
+                      )}
                     </div>
                   </div>
                 </div>
