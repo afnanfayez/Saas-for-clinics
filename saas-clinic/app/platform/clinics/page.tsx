@@ -36,6 +36,8 @@ export default function ClinicsManagement() {
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
   useRoleGuard(['Admin']);
 
@@ -77,16 +79,13 @@ export default function ClinicsManagement() {
         search: searchTerm,
       });
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/clinics?${params}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE}/admin/clinics?${params}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -98,14 +97,32 @@ export default function ClinicsManagement() {
       }
 
       const data = await response.json();
+      const payload = (data as any)?.data ?? data;
+      const clinicsPayload = payload?.clinics;
 
-      if (data.success) {
-        setClinics(data.clinics.data || []);
+      if (data.success && clinicsPayload) {
+        const clinicList = (clinicsPayload.data || clinicsPayload || []).map(
+          (c: any) => ({
+            clinic_id: c.id ?? c.clinic_id,
+            name: c.name,
+            address: c.address,
+            phone: c.phone,
+            email: c.email,
+            status: c.status,
+            subscription_plan: c.subscription_plan,
+            subscription_start: c.subscription_start,
+            subscription_end: c.subscription_end,
+            users_count: c.users_count ?? 0,
+            created_at: c.created_at,
+          })
+        );
+
+        setClinics(clinicList);
         setPagination({
-          current_page: data.clinics.current_page,
-          last_page: data.clinics.last_page,
-          per_page: data.clinics.per_page,
-          total: data.clinics.total,
+          current_page: payload.pagination?.current_page ?? clinicsPayload.current_page ?? 1,
+          last_page: payload.pagination?.last_page ?? clinicsPayload.last_page ?? 1,
+          per_page: payload.pagination?.per_page ?? clinicsPayload.per_page ?? pagination.per_page,
+          total: payload.pagination?.total ?? clinicsPayload.total ?? 0,
         });
       }
     } catch (error) {
@@ -146,7 +163,7 @@ export default function ClinicsManagement() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/clinics/${clinicId}/toggle-status`,
+        `${API_BASE}/admin/clinics/${clinicId}/toggle-status`,
         {
           method: 'PATCH',
           headers: {
@@ -168,12 +185,13 @@ export default function ClinicsManagement() {
       }
 
       const data = await response.json();
+      const clinicPayload = (data as any)?.data ?? data;
 
-      if (data.success) {
+      if (data.success && clinicPayload) {
         // Update the clinic in the list
         setClinics((prev) =>
           prev.map((clinic) =>
-            clinic.clinic_id === clinicId ? { ...clinic, status: data.clinic.status } : clinic
+            clinic.clinic_id === clinicId ? { ...clinic, status: clinicPayload.status } : clinic
           )
         );
         
@@ -181,8 +199,8 @@ export default function ClinicsManagement() {
           isOpen: true,
           message:
             language === 'ar'
-              ? `تم ${data.clinic.status === 'Active' ? 'تفعيل' : 'تعطيل'} العيادة بنجاح`
-              : `Clinic ${data.clinic.status === 'Active' ? 'activated' : 'deactivated'} successfully`,
+              ? `تم ${clinicPayload.status === 'Active' ? 'تفعيل' : 'تعطيل'} العيادة بنجاح`
+              : `Clinic ${clinicPayload.status === 'Active' ? 'activated' : 'deactivated'} successfully`,
           type: 'success',
         });
       } else {
