@@ -36,9 +36,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const mapped: Appointment[] = (data.appointments as ApiAppointment[]).map(
-      mapAppointmentFromApi
-    );
+    const appointmentsPayload =
+      (data as any)?.appointments ??
+      (data as any)?.data ??
+      [];
+
+    const mapped: Appointment[] = Array.isArray(appointmentsPayload)
+      ? (appointmentsPayload as ApiAppointment[]).map(mapAppointmentFromApi)
+      : [];
 
     return NextResponse.json({ appointments: mapped }, { status: 200 });
   } catch (err: unknown) {

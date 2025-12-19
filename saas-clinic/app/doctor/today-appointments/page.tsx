@@ -10,6 +10,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import type { Appointment } from "@/types/appointment";
 import AppointmentDetailsModal from "@/components/doctor/AppointmentDetailsModal";
 import CreateMedicalRecordForm from "@/components/doctor/CreateMedicalRecordForm";
+import { mapAppointmentFromApi, ApiAppointment } from "@/utils/mapAppointment";
 
 // ======== API TYPES التي نحتاجها فقط ======== //
 interface ApiPatient {
@@ -88,24 +89,15 @@ const fetchTodayAppointments = async () => {
       );
     }
 
-    const data = json as TodayAppointmentsResponse;
+    const payload = (json as any)?.data ?? json;
+    const appointmentsPayload =
+      (payload as any)?.appointments ??
+      (payload as any)?.data ??
+      (Array.isArray(payload) ? payload : []);
 
-    const mapped: Appointment[] = (data.appointments || []).map((a) => {
-      const dateOnly = a.appointment_date.slice(0, 10);
-      const dateTime = a.appointment_time
-        ? `${dateOnly}T${a.appointment_time}`
-        : a.appointment_date;
-
-      return {
-        id: a.appointment_id,
-        dateTime,
-        status: a.status,
-        notes: a.notes || undefined,
-        patientName: a.patient?.name || undefined,
-        patientPhone: a.patient?.phone || undefined,
-        patientId: a.patient?.patient_id,
-      };
-    });
+    const mapped: Appointment[] = Array.isArray(appointmentsPayload)
+      ? (appointmentsPayload as ApiAppointment[]).map(mapAppointmentFromApi)
+      : [];
 
     setAppointments(mapped);
   } catch (err: unknown) {
