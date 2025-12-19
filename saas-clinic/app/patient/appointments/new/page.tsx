@@ -43,7 +43,8 @@ export default function NewAppointmentPage() {
         const data = await response.json();
 
         if (response.ok) {
-          setDoctors(data.doctors || []);
+          const payload = data?.data ?? data;
+          setDoctors(payload?.doctors || payload || []);
         } else {
           setError(data.message || "Failed to load doctors");
         }
@@ -86,15 +87,13 @@ export default function NewAppointmentPage() {
     try {
       setLoading(true);
 
-      // Combine date + time ISO format
-      const appointmentDateTime = new Date(`${form.date}T${form.time}`).toISOString();
-
       const response = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           doctor_id: parseInt(form.doctor_id),
-          appointment_date: appointmentDateTime,
+          appointment_date: form.date,
+          appointment_time: form.time,
           notes: "",
         }),
       });
@@ -210,12 +209,14 @@ export default function NewAppointmentPage() {
                     : "Select a doctor"}
                 </option>
 
-                {doctors.map((doctor) => (
-                  <option key={doctor.doctor_id} value={doctor.doctor_id}>
+                {doctors.map((doctor, idx) => {
+                  const docId = doctor.doctor_id ?? (doctor as any)?.id ?? idx;
+                  return (
+                  <option key={docId} value={docId}>
                     {doctor.name}
                     {doctor.specialization ? ` - ${doctor.specialization}` : ""}
                   </option>
-                ))}
+                )})}
               </select>
 
               {!loadingDoctors && doctors.length === 0 && (

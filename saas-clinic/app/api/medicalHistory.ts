@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
 
 export type Visit = {
   date: string;
@@ -31,15 +31,23 @@ export async function getPatientMedicalHistory(
       config
     );
 
-    // Backend returns { patient: {...}, medicalHistory: [...] }
-    const medicalHistory = response.data.medicalHistory || [];
+    const payload = (response.data as any)?.data ?? response.data;
+    const medicalHistory = Array.isArray(payload?.medical_history)
+      ? payload.medical_history
+      : Array.isArray(payload?.history)
+      ? payload.history
+      : Array.isArray(payload?.medicalHistory)
+      ? payload.medicalHistory
+      : Array.isArray(payload)
+      ? payload
+      : [];
     
     // Transform backend data to Visit format
     return medicalHistory.map((record: any) => ({
-      date: record.visit_date || record.created_at?.split('T')[0] || 'N/A',
-      clinic: record.clinic_name || 'Clinic',
-      diagnosis: record.diagnosis || 'No diagnosis recorded',
-      doctor: record.doctor_name || 'Unknown Doctor',
+      date: record.visit_date || record.date || record.created_at?.split('T')[0] || 'N/A',
+      clinic: record.clinic_name || record.clinic || 'Clinic',
+      diagnosis: record.diagnosis || record.notes || 'No diagnosis recorded',
+      doctor: record.doctor_name || record.doctor || 'Unknown Doctor',
     }));
   } catch (error) {
     console.error('Error fetching patient medical history:', error);
@@ -57,9 +65,32 @@ export async function getMyMedicalHistory(token: string): Promise<Visit[]> {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    validateStatus: () => true,
   };
 
-  const response = await axios.get(`${API_BASE}/patient/medical-history`, config);
+  try {
+    const response = await axios.get(`${API_BASE}/patient/medical-history`, config);
 
-  return response.data.data || response.data || [];
+    if (response.status >= 400) {
+      console.error("Failed to fetch my medical history:", response.status, response.data);
+      return [];
+    }
+
+    const payload = (response.data as any)?.data ?? response.data;
+    const history = Array.isArray(payload?.medical_history)
+      ? payload.medical_history
+      : Array.isArray(payload)
+      ? payload
+      : [];
+
+    return history.map((record: any) => ({
+      date: record.visit_date || record.date || record.created_at?.split("T")[0] || "N/A",
+      clinic: record.clinic_name || record.clinic || "Clinic",
+      diagnosis: record.diagnosis || record.notes || "No diagnosis recorded",
+      doctor: record.doctor_name || record.doctor || "Unknown Doctor",
+    }));
+  } catch (error) {
+    console.error("Error fetching my medical history:", error);
+    return [];
+  }
 }
