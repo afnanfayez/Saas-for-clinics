@@ -4,18 +4,51 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { translations } from "@/lib/translations";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRoleGuard } from "@/lib/roleGuard";
 import DashboardHero from "@/components/DashboardHero";
 import StatCard from "@/components/StatCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { UserPlus, CalendarCheck, Clock, AlertCircle } from "lucide-react";
+import apiClient from "@/lib/api";
+
+interface DashboardStats {
+  checkins_today: number;
+  scheduled_appointments: number;
+  waiting_patients: number;
+  pending_requests: number;
+}
+
+interface TodayAppointment {
+  id: number;
+  time: string;
+  patient: string;
+  doctor: string;
+  type: string;
+  status: string;
+  notes?: string;
+}
+
+interface WaitingPatient {
+  id: number;
+  patient: string;
+  ticket: string;
+  waiting_minutes: number;
+  appointment_time?: string;
+}
 
 export default function ReceptionDashboard() {
   const { user, clinic, isAuthenticated, isLoading } = useAuth();
   const { language } = useLanguage();
   const t = translations[language];
   const router = useRouter();
+
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([]);
+  const [waitingList, setWaitingList] = useState<WaitingPatient[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [loadingWaiting, setLoadingWaiting] = useState(true);
 
   // Protect route - only secretaries can access
   useRoleGuard(['Secretary']);
@@ -25,6 +58,63 @@ export default function ReceptionDashboard() {
       router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Fetch dashboard stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+        const response = await apiClient.get("/secretary/dashboard/stats");
+        setStats(response.data);
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    if (isAuthenticated && user?.role === "Secretary") {
+      fetchStats();
+    }
+  }, [isAuthenticated, user]);
+
+  // Fetch today's appointments
+  useEffect(() => {
+    const fetchTodayAppointments = async () => {
+      try {
+        setLoadingAppointments(true);
+        const response = await apiClient.get("/secretary/dashboard/today-appointments");
+        setTodayAppointments(response.data);
+      } catch (error) {
+        console.error("Error fetching today's appointments:", error);
+      } finally {
+        setLoadingAppointments(false);
+      }
+    };
+
+    if (isAuthenticated && user?.role === "Secretary") {
+      fetchTodayAppointments();
+    }
+  }, [isAuthenticated, user]);
+
+  // Fetch waiting room
+  useEffect(() => {
+    const fetchWaitingRoom = async () => {
+      try {
+        setLoadingWaiting(true);
+        const response = await apiClient.get("/secretary/dashboard/waiting-room");
+        setWaitingList(response.data);
+      } catch (error) {
+        console.error("Error fetching waiting room:", error);
+      } finally {
+        setLoadingWaiting(false);
+      }
+    };
+
+    if (isAuthenticated && user?.role === "Secretary") {
+      fetchWaitingRoom();
+    }
+  }, [isAuthenticated, user]);
 
   if (isLoading || !user) {
     return (
@@ -44,18 +134,18 @@ export default function ReceptionDashboard() {
     }
   );
 
-  // fake data  ..
-  const stats = [
+  // Map stats to StatCard format
+  const statsCards = stats ? [
     {
       label: t.checkinsToday || "حالات الاستقبال اليوم",
-      value: 24,
+      value: stats.checkins_today,
       sub: language === "ar" ? "منذ بداية اليوم" : "Since the start of the day",
       icon: UserPlus,
       color: "teal" as const,
     },
     {
       label: t.scheduledAppointments || "المواعيد المجدولة اليوم",
-      value: 32,
+      value: stats.scheduled_appointments,
       sub:
         language === "ar"
           ? "بين الساعة 8:00 و 20:00"
@@ -65,7 +155,7 @@ export default function ReceptionDashboard() {
     },
     {
       label: t.waitingPatients || "المرضى في غرفة الانتظار",
-      value: 5,
+      value: stats.waiting_patients,
       sub:
         language === "ar"
           ? "بمعدل انتظار 12 دقيقة"
@@ -75,7 +165,7 @@ export default function ReceptionDashboard() {
     },
     {
       label: t.appointmentRequests || "طلبات مواعيد معلّقة",
-      value: 7,
+      value: stats.pending_requests,
       sub:
         language === "ar"
           ? "بانتظار مراجعة السكرتير"
@@ -83,49 +173,18 @@ export default function ReceptionDashboard() {
       icon: AlertCircle,
       color: "amber" as const,
     },
-  ];
+  ] : [];
 
-  const upcomingAppointments = [
-    {
-      time: "09:30",
-      patient: language === "ar" ? "أحمد علي" : "Ahmad Ali",
-      doctor: language === "ar" ? "د. محمد سالم" : "Dr. Mohammed Salem",
-      type: language === "ar" ? "عيادة قلب" : "Cardiology clinic",
-      status: "confirmed",
-    },
-    {
-      time: "10:00",
-      patient: language === "ar" ? "سارة خليل" : "Sara Khalil",
-      doctor: language === "ar" ? "د. ليلى خالد" : "Dr. Layla Khaled",
-      type: language === "ar" ? "متابعة تحليل" : "Lab follow-up",
-      status: "waiting",
-    },
-    {
-      time: "10:15",
-      patient: language === "ar" ? "يوسف عمر" : "Yousef Omar",
-      doctor: language === "ar" ? "د. حازم ربيع" : "Dr. Hazem Rabee",
-      type: language === "ar" ? "استشارة أولية" : "First consultation",
-      status: "checked-in",
-    },
-  ];
+  // Map today's appointments
+  const upcomingAppointments = todayAppointments.map(apt => ({
+    time: apt.time,
+    patient: apt.patient,
+    doctor: apt.doctor,
+    type: apt.type,
+    status: apt.status.toLowerCase(),
+  }));
 
-  const waitingList = [
-    {
-      patient: language === "ar" ? "محمد إبراهيم" : "Mohammed Ibrahim",
-      ticket: "A12",
-      waitingMinutes: 7,
-    },
-    {
-      patient: language === "ar" ? "أسيل حسن" : "Aseel Hasan",
-      ticket: "A13",
-      waitingMinutes: 3,
-    },
-    {
-      patient: language === "ar" ? "نادر خليل" : "Nader Khalil",
-      ticket: "B01",
-      waitingMinutes: 15,
-    },
-  ];
+  // Waiting list is already in the correct format from API
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -195,16 +254,22 @@ export default function ReceptionDashboard() {
 
         {/* Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((item) => (
-            <StatCard
-              key={item.label}
-              label={item.label}
-              value={item.value}
-              sub={item.sub}
-              icon={item.icon}
-              color={item.color}
-            />
-          ))}
+          {loadingStats ? (
+            <div className="col-span-full flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            </div>
+          ) : (
+            statsCards.map((item) => (
+              <StatCard
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                sub={item.sub}
+                icon={item.icon}
+                color={item.color}
+              />
+            ))
+          )}
         </section>
 
         {/* Appointments + waiting room */}
@@ -224,7 +289,7 @@ export default function ReceptionDashboard() {
                 </p>
               </div>
               <button
-                onClick={() => router.push("/reception/appointments/manage")}
+                onClick={() => router.push("/reception/appointments/requests")}
                 className="text-xs text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline"
               >
                 {t.manageAllAppointments || "إدارة جميع المواعيد"}
@@ -232,34 +297,41 @@ export default function ReceptionDashboard() {
             </div>
 
             <div className="divide-y divide-gray-100 dark:divide-slate-700">
-              {upcomingAppointments.map((app, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-xs font-semibold text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 rounded-lg px-3 py-1">
-                      {app.time}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {app.patient}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-slate-400">
-                        {language === "ar"
-                          ? `مع ${app.doctor} • ${app.type}`
-                          : `with ${app.doctor} • ${app.type}`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    {getStatusBadge(app.status)}
-                    <button className="text-[11px] text-teal-700 dark:text-teal-400 hover:underline">
-                      {t.appointmentDetailsEdit || "تفاصيل / تعديل"}
-                    </button>
-                  </div>
+              {loadingAppointments ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600"></div>
                 </div>
-              ))}
+              ) : upcomingAppointments.length === 0 ? (
+                <div className="px-4 sm:px-5 py-6 text-center text-sm text-gray-500 dark:text-slate-400">
+                  {language === "ar" ? "لا توجد مواعيد اليوم" : "No appointments today"}
+                </div>
+              ) : (
+                upcomingAppointments.map((app, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-xs font-semibold text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 rounded-lg px-3 py-1">
+                        {app.time}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {app.patient}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">
+                          {language === "ar"
+                            ? `مع ${app.doctor} • ${app.type}`
+                            : `with ${app.doctor} • ${app.type}`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {getStatusBadge(app.status)}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -280,31 +352,38 @@ export default function ReceptionDashboard() {
             </div>
 
             <div className="divide-y divide-gray-100 dark:divide-slate-700">
-              {waitingList.map((w, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {w.patient}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">
-                      {language === "ar"
-                        ? `وقت انتظار: ${w.waitingMinutes} دقيقة`
-                        : `Waiting time: ${w.waitingMinutes} min`}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="inline-flex items-center rounded-xl bg-gray-900 dark:bg-slate-600 text-white text-xs font-semibold px-3 py-1">
-                      {w.ticket}
-                    </span>
-                    <button className="text-[11px] text-teal-700 dark:text-teal-400 hover:underline">
-                      {t.waitingRoomCheckin || "استقبال / تسجيل دخول"}
-                    </button>
-                  </div>
+              {loadingWaiting ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600"></div>
                 </div>
-              ))}
+              ) : waitingList.length === 0 ? (
+                <div className="px-4 sm:px-5 py-6 text-center text-sm text-gray-500 dark:text-slate-400">
+                  {language === "ar" ? "لا يوجد مرضى في الانتظار" : "No patients waiting"}
+                </div>
+              ) : (
+                waitingList.map((w, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {w.patient}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">
+                        {language === "ar"
+                          ? `وقت انتظار: ${w.waiting_minutes} دقيقة`
+                          : `Waiting time: ${w.waiting_minutes} min`}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center rounded-xl bg-gray-900 dark:bg-slate-600 text-white text-xs font-semibold px-3 py-1">
+                        {w.ticket}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>
