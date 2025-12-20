@@ -73,10 +73,15 @@ export default function PlatformDashboard() {
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
+        if (!response.ok) {
+          console.error('Failed to fetch admin stats:', response.status);
+          return;
         }
+
+        const data = await response.json();
+        // Backend returns { success, message, data: {...stats} }
+        const statsPayload = (data as any)?.data ?? data;
+        setStats(statsPayload);
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {

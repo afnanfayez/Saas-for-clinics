@@ -17,6 +17,8 @@ export interface StaffMember {
   end_time?: string; // "HH:mm"
   slot_duration?: number;
 }
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
 
 export interface UpdateSchedulePayload {
   available_days: string;
@@ -36,7 +38,7 @@ export interface UpdateSchedulePayload {
  * Fetch all staff members (doctors)
  */
 export const getDoctors = async (token: string): Promise<StaffMember[]> => {
-  const response = await fetch('http://127.0.0.1:8000/api/manager/staff', {
+  const response = await fetch(`${API_BASE}/manager/staff`, {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
@@ -48,16 +50,34 @@ export const getDoctors = async (token: string): Promise<StaffMember[]> => {
     throw new Error('Failed to fetch staff members');
   }
 
-  const data = await response.json();
-  // Filter only doctors
-  return data.members.filter((m: StaffMember) => m.role === 'Doctor');
+  const json = await response.json();
+  const payload = (json as any)?.data ?? json;
+  const members = Array.isArray(payload) ? payload : payload?.members ?? [];
+
+  const flattened: StaffMember[] = members.map((m: any) => ({
+    user_id: m.user_id,
+    clinic_id: m.clinic_id,
+    name: m.name,
+    email: m.email,
+    phone: m.phone,
+    role: m.role,
+    status: m.status,
+    specialization: m.doctor?.specialization ?? m.specialization,
+    available_days: m.doctor?.available_days ?? m.available_days,
+    clinic_room: m.doctor?.clinic_room ?? m.clinic_room,
+    start_time: m.doctor?.start_time ?? m.start_time,
+    end_time: m.doctor?.end_time ?? m.end_time,
+    slot_duration: m.doctor?.slot_duration ?? m.slot_duration,
+  }));
+
+  return flattened.filter((m) => m.role === 'Doctor');
 };
 
 /**
  * Update a doctor's schedule
  */
 export const updateDoctorSchedule = async (token: string, userId: number, payload: UpdateSchedulePayload): Promise<StaffMember> => {
-  const response = await fetch(`http://127.0.0.1:8000/api/manager/staff/${userId}`, {
+  const response = await fetch(`${API_BASE}/manager/staff/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -73,5 +93,6 @@ export const updateDoctorSchedule = async (token: string, userId: number, payloa
   }
 
   const data = await response.json();
-  return data.user;
+  const userPayload = (data as any)?.data ?? (data as any)?.user ?? data;
+  return userPayload;
 };

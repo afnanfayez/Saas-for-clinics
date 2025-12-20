@@ -27,7 +27,10 @@ export function DoctorStats({ appointments, loading = false }: DoctorStatsProps)
   }).length;
 
   const pendingCount = appointments.filter(
-    (a) => (a.status ?? "").toString().toLowerCase() === "pending"
+    (a) => {
+      const status = (a.status ?? "").toString().toLowerCase();
+      return status === "pending" || status === "requested";
+    }
   ).length;
   
   const patientKeys = new Set<string>();

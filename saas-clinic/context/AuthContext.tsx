@@ -56,7 +56,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password,
       });
 
-      const { user: userData, token: authToken, is_platform_admin } = response.data;
+      const payload = (response.data as LoginResponse & { data?: LoginResponse }).data ?? response.data;
+
+      const { user: userData, token: authToken, is_platform_admin } = (payload as any) || {};
+
+      if (!userData || !authToken) {
+        throw new Error('Invalid login response from server');
+      }
 
       // Store token and user data in cookies (7 days expiry)
       Cookies.set('auth_token', authToken, { 

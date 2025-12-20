@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapAppointmentFromApi, ApiAppointment } from "@/utils/mapAppointment";
 import type { Appointment } from "@/types/appointment";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL||`http://127.0.0.1:8000/api`
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || `http://127.0.0.1:8000/api`;
 
 export async function GET(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
@@ -43,9 +44,14 @@ if (!res.ok) {
   );
 }
 
-const mapped: Appointment[] = (data.appointments as ApiAppointment[]).map(
-  mapAppointmentFromApi
-);
+const appointmentsPayload =
+  (data as any)?.appointments ??
+  (data as any)?.data ??
+  [];
+
+const mapped: Appointment[] = Array.isArray(appointmentsPayload)
+  ? (appointmentsPayload as ApiAppointment[]).map(mapAppointmentFromApi)
+  : [];
 
 
 

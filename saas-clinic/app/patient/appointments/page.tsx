@@ -67,35 +67,47 @@ export default function MyAppointmentsPage() {
         setIsLoadingAppointments(true);
         setError(null);
         
-        const response = await apiClient.get<{ appointments: BackendAppointment[] }>(
+        const response = await apiClient.get<{ appointments?: BackendAppointment[]; data?: any }>(
           "/patient/appointments"
         );
 
-        // Map backend appointments to frontend structure
-        const mappedAppointments: Appointment[] = response.data.appointments.map(
-          (apt) => {
-            const appointmentDateTime = new Date(apt.appointment_date);
-            const date = appointmentDateTime.toISOString().split("T")[0];
-            const time = appointmentDateTime.toTimeString().slice(0, 5);
+        const payload =
+          (response.data as any)?.appointments ??
+          (response.data as any)?.data ??
+          [];
 
-            // Map backend status to frontend status
-            let status: Appointment["status"] = "pending";
-            if (apt.status === "Approved") status = "confirmed";
-            else if (apt.status === "Requested" || apt.status === "Pending Doctor Approval") status = "pending";
-            else if (apt.status === "Cancelled") status = "cancelled";
-            else if (apt.status === "Completed") status = "completed";
+        const mappedAppointments: Appointment[] = Array.isArray(payload)
+          ? (payload as BackendAppointment[]).map((apt) => {
+              const dateVal = apt.date ?? apt.appointment_date ?? "";
+              const timeVal = apt.time ?? "";
 
-            return {
-              id: apt.appointment_id.toString(),
-              date,
-              time,
-              clinic: apt.clinic.name,
-              doctor: apt.doctor.user.name,
-              status,
-              notes: apt.notes,
-            };
-          }
-        );
+              const date = dateVal
+                ? new Date(dateVal).toISOString().split("T")[0]
+                : "";
+              const time = timeVal
+                ? timeVal.slice(0, 5)
+                : dateVal
+                ? new Date(dateVal).toTimeString().slice(0, 5)
+                : "";
+
+              let status: Appointment["status"] = "pending";
+              if ((apt.status || "").toLowerCase() === "approved") status = "confirmed";
+              else if (["requested", "pending doctor approval"].includes((apt.status || "").toLowerCase()))
+                status = "pending";
+              else if ((apt.status || "").toLowerCase() === "cancelled") status = "cancelled";
+              else if ((apt.status || "").toLowerCase() === "completed") status = "completed";
+
+              return {
+                id: (apt.appointment_id ?? (apt as any).id ?? "").toString(),
+                date,
+                time,
+                clinic: apt.clinic?.name ?? "",
+                doctor: apt.doctor?.user?.name ?? (apt as any)?.doctor_name ?? "",
+                status,
+                notes: apt.notes,
+              };
+            })
+          : [];
 
         setAppointments(mappedAppointments);
       } catch (err: unknown) {

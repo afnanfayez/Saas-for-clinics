@@ -2,11 +2,14 @@
 import { Appointment, AppointmentStatus } from "@/types/appointment";
 
 export interface ApiAppointment {
-  appointment_id: number;
+  appointment_id?: number;
+  id?: number;
   clinic_id: number;
   doctor_id: number;
   patient_id: number;
-  appointment_date: string;
+  appointment_date?: string;
+  date?: string;
+  time?: string;
   status: string; // "Requested", "Approved", ...
   notes?: string;
   created_at?: string;
@@ -20,9 +23,11 @@ export interface ApiAppointment {
       email: string;
       phone?: string;
     };
+    name?: string;
   };
   clinic?: {
     clinic_id: number;
+    id?: number;
     name: string;
   };
 }
@@ -30,18 +35,29 @@ export interface ApiAppointment {
 export function mapAppointmentFromApi(a: ApiAppointment): Appointment {
   const normalizedStatus = (a.status || "").toLowerCase() as AppointmentStatus;
 
+  const dateTime =
+    a.appointment_date ??
+    (a.date && a.time ? `${a.date}T${a.time}` : a.date ?? undefined);
+
   return {
-    id: a.appointment_id,
-    clinicId: a.clinic_id,
+    id: a.appointment_id ?? a.id ?? 0,
+    clinicId: a.clinic_id ?? a.clinic?.id ?? 0,
     doctorId: a.doctor_id,
     patientId: a.patient_id,
-    dateTime: a.appointment_date,
+    dateTime,
     status: normalizedStatus,
     notes: a.notes,
     createdAt: a.created_at,
     updatedAt: a.updated_at,
-    patientName: a.patient?.user?.name ?? "Unknown",
-    patientPhone: a.patient?.user?.phone,
+    patientName:
+      a.patient?.user?.name ??
+      a.patient?.name ??
+      (a as any)?.patient_name ??
+      "Unknown",
+    patientPhone:
+      a.patient?.user?.phone ??
+      a.patient?.phone ??
+      (a as any)?.patient_phone,
     clinicName: a.clinic?.name,
   };
 }

@@ -51,10 +51,32 @@ export default function PatientDashboard() {
           apiClient.get("/patient/appointments/upcoming"),
         ]);
 
-        setDashboardData(statsRes.data as PatientDashboardData);
-        setUpcomingAppointments(
-          (appointmentsRes.data.appointments as UpcomingAppointment[]) ?? []
-        );
+        const statsPayload =
+          (statsRes.data as any)?.data ?? (statsRes.data as any);
+        const apptsPayload =
+          (appointmentsRes.data as any)?.data ??
+          (appointmentsRes.data as any)?.appointments ??
+          appointmentsRes.data;
+
+        const mappedAppointments: UpcomingAppointment[] = Array.isArray(
+          apptsPayload
+        )
+          ? apptsPayload.map((a: any) => ({
+              appointment_date: a.date && a.time
+                ? `${a.date}T${a.time}`
+                : a.appointment_date || a.date || "",
+              status: a.status || "",
+              clinic: a.clinic
+                ? { name: a.clinic.name }
+                : undefined,
+              doctor: a.doctor
+                ? { user: { name: a.doctor.name ?? a.doctor.user?.name ?? "" } }
+                : undefined,
+            }))
+          : [];
+
+        setDashboardData(statsPayload as PatientDashboardData);
+        setUpcomingAppointments(mappedAppointments);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {

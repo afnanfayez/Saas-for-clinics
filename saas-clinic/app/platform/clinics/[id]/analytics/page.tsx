@@ -76,6 +76,8 @@ export default function ClinicAnalytics() {
   const router = useRouter();
   const params = useParams();
   const clinicId = params.id as string;
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
   useRoleGuard(['Admin']);
 
@@ -105,7 +107,7 @@ export default function ClinicAnalytics() {
       setError(null);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/clinics/${clinicId}`,
+        `${API_BASE}/admin/clinics/${clinicId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -120,9 +122,63 @@ export default function ClinicAnalytics() {
       }
 
       const data = await response.json();
+      const payload = (data as any)?.data ?? data;
 
-      if (data.success) {
-        setAnalytics(data);
+      if (data.success && payload) {
+        // Backend returns clinic fields at root; normalize to expected shape
+        const clinicData: Clinic = {
+          clinic_id: payload.clinic_id ?? payload.id ?? clinicId,
+          name: payload.name ?? payload.clinic?.name ?? '',
+          address: payload.address ?? payload.clinic?.address ?? '',
+          phone: payload.phone ?? payload.clinic?.phone ?? '',
+          email: payload.email ?? payload.clinic?.email ?? '',
+          status: payload.status ?? payload.clinic?.status ?? 'Inactive',
+          subscription_plan:
+            payload.subscription_plan ??
+            payload.clinic?.subscription_plan ??
+            'Basic',
+          subscription_start:
+            payload.subscription_start ??
+            payload.clinic?.subscription_start ??
+            '',
+          subscription_end:
+            payload.subscription_end ??
+            payload.clinic?.subscription_end ??
+            '',
+          logo_url: payload.logo_url ?? payload.clinic?.logo_url,
+          created_at: payload.created_at ?? payload.clinic?.created_at ?? '',
+        };
+
+        const analyticsData: ClinicAnalytics = {
+          clinic: clinicData,
+          users: payload.users ?? {
+            doctors: [],
+            patients: [],
+            secretaries: [],
+            managers: [],
+          },
+          user_counts: payload.user_counts ?? {
+            total: 0,
+            doctors: 0,
+            patients: 0,
+            secretaries: 0,
+            managers: 0,
+            active: 0,
+            inactive: 0,
+          },
+          appointment_stats: payload.appointment_stats ?? {
+            total: 0,
+            requested: 0,
+            pending: 0,
+            approved: 0,
+            completed: 0,
+            cancelled: 0,
+            rejected: 0,
+          },
+          subscription: payload.subscription ?? null,
+        };
+
+        setAnalytics(analyticsData);
       } else {
         throw new Error(data.message || 'Failed to fetch analytics');
       }

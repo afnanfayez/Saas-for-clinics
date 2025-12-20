@@ -30,58 +30,14 @@ interface ApiAppointment {
 }
 
 interface AppointmentsResponse {
-  appointments?: ApiAppointment[];
-  data?: ApiAppointment[];
+  appointments?: Appointment[];
+  data?: Appointment[];
 }
 
 type ApiError = {
   message?: string;
   error?: string;
 };
-
-function normalizeAppointments(
-  json: AppointmentsResponse | Appointment[]
-): Appointment[] {
-  const base: (ApiAppointment | Appointment)[] = Array.isArray(json)
-    ? json
-    : json.appointments ?? json.data ?? [];
-
-  return base.map((raw) => {
-    const a = raw as ApiAppointment & Partial<Appointment>;
-
-    const appointment_date =
-      a.appointment_date ??
-      (a.dateTime
-        ? new Date(a.dateTime).toISOString().slice(0, 10)
-        : undefined);
-
-    const appointment_time =
-      a.appointment_time ??
-      (a.dateTime
-        ? new Date(a.dateTime).toTimeString().slice(0, 5)
-        : undefined);
-
-    const dateTime =
-      a.dateTime ??
-      (appointment_date && appointment_time
-        ? `${appointment_date}T${appointment_time}`
-        : appointment_date
-        ? `${appointment_date}T00:00`
-        : undefined);
-
-    const normalized: Appointment = {
-      id: a.id ?? a.appointment_id ?? 0,
-      dateTime,
-      status: a.status ?? a.appointment_status ?? "requested",
-      notes: a.notes ?? a.reason ?? "",
-      patientName: a.patientName ?? a.patient_name ?? "",
-      patientPhone: a.patientPhone ?? a.patient_phone ?? "",
-      clinicName: a.clinicName ?? a.clinic_name ?? "",
-    };
-
-    return normalized;
-  });
-}
 
 export default function DoctorDashboard() {
   const { user, token, isLoading } = useAuth();
@@ -121,8 +77,14 @@ export default function DoctorDashboard() {
         );
       }
 
-      const normalized = normalizeAppointments(json);
-      setAppointments(normalized);
+      const list =
+        (json.appointments && Array.isArray(json.appointments)
+          ? json.appointments
+          : Array.isArray(json.data)
+          ? json.data
+          : []) as Appointment[];
+
+      setAppointments(list);
     } catch (err: unknown) {
       let message = isArabic
         ? "فشل في جلب المواعيد"

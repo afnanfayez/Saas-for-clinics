@@ -20,18 +20,25 @@ export interface User {
   clinic?: Clinic;
 }
 
-export interface LoginRequest {
-  email: string;
+export type LoginRequest = {
+  login: string;
   password: string;
-}
+};
 
-export interface LoginResponse {
-  message: string;
+export interface LoginData {
   user: User;
   token: string;
   role: UserRole;
   is_platform_admin: boolean;
 }
+
+export type LoginResponse =
+  | LoginData
+  | {
+      success?: boolean;
+      message?: string;
+      data?: LoginData;
+    };
 
 export interface AuthContextType {
   user: User | null;

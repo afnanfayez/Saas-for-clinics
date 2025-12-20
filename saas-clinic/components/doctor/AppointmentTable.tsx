@@ -119,8 +119,11 @@ export function AppointmentTable({
             </tr>
           </thead>
           <tbody>
-            {appointments.map((appt) => (
-              <tr key={appt.id} className="border-b last:border-0 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+            {appointments.map((appt, idx) => (
+              <tr
+                key={appt.id ?? `${appt.patientName}-${appt.dateTime}-${idx}`}
+                className="border-b last:border-0 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              >
                 <td className="py-3 px-3 align-middle text-center">
                   <div className="font-medium text-slate-900 dark:text-white">{appt.patientName}</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">

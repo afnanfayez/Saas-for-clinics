@@ -48,8 +48,8 @@ export async function getAvailableTimeSlots(
     );
     
     console.log('Time slots response:', response.data);
-    
-    return response.data.available_slots || [];
+    const payload = (response.data as any)?.data ?? response.data;
+    return payload?.available_slots || [];
   } catch (error: any) {
     console.error('Error fetching time slots:', {
       message: error.message,

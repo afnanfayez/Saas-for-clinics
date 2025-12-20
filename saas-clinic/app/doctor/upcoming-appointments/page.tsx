@@ -8,6 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { mapAppointmentFromApi, ApiAppointment } from "@/utils/mapAppointment";
 
 interface AppointmentsResponse {
   appointments: Appointment[];
@@ -55,7 +56,16 @@ export default function DoctorUpcomingAppointmentsPage() {
         );
       }
 
-      setAppointments((json as AppointmentsResponse).appointments);
+      const payload = (json as any)?.data ?? json;
+      const appointmentsPayload =
+        (payload as any)?.appointments ??
+        (Array.isArray(payload) ? payload : []);
+
+      const list: Appointment[] = Array.isArray(appointmentsPayload)
+        ? (appointmentsPayload as ApiAppointment[]).map(mapAppointmentFromApi)
+        : [];
+
+      setAppointments(list);
       hasLoaded.current = true;
     } catch (err) {
       console.error("Error fetching appointments:", err);
