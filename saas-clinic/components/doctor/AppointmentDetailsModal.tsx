@@ -33,12 +33,13 @@ interface PatientFromApi {
 
 interface PatientHistoryResponse {
   patient: PatientFromApi;
-  medicalHistory: MedicalRecord[];
+  medical_history: MedicalRecord[];
 }
 
 type PatientHistoryApiResponse =
   | PatientHistoryResponse
   | (Partial<PatientHistoryResponse> & {
+      medicalHistory?: MedicalRecord[];
       history?: MedicalRecord[];
       message?: string;
     });
@@ -151,16 +152,20 @@ export default function AppointmentDetailsModal({
           }
         );
 
-        const json = res.data as PatientHistoryApiResponse;
+        // The API wraps the response in a data object
+        const responseData = res.data.data || res.data;
+        const json = responseData as PatientHistoryApiResponse;
 
         if ("patient" in json && json.patient) {
           setPatient(json.patient);
         }
 
-        if ("medicalHistory" in json && Array.isArray(json.medicalHistory)) {
+        // Check for medical_history (snake_case) first, then fallback to camelCase variants
+        if ("medical_history" in json && Array.isArray(json.medical_history)) {
+          setHistory(json.medical_history);
+        } else if ("medicalHistory" in json && Array.isArray(json.medicalHistory)) {
           setHistory(json.medicalHistory);
         } else if ("history" in json && Array.isArray(json.history)) {
-          // fallback لو اسم الحقل مختلف في الباك
           setHistory(json.history);
         }
       } catch (err: unknown) {
