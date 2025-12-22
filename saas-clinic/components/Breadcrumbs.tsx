@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface BreadcrumbItem {
   label: string;
@@ -16,6 +17,7 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { language } = useLanguage();
+  const { user, isPlatformAdmin } = useAuth();
 
   const roleLabels: Record<string, { en: string; ar: string }> = {
     platform: { en: 'Admin', ar: 'الإدارة' },
@@ -56,7 +58,22 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
 
     if (paths.length === 0) return breadcrumbs;
 
-    const role = paths[0];
+    // Determine the user's actual role-based path
+    let userRolePath = '';
+    if (isPlatformAdmin) {
+      userRolePath = 'platform';
+    } else if (user?.role === 'Manager') {
+      userRolePath = 'clinic';
+    } else if (user?.role === 'Doctor') {
+      userRolePath = 'doctor';
+    } else if (user?.role === 'Secretary') {
+      userRolePath = 'reception';
+    } else if (user?.role === 'Patient') {
+      userRolePath = 'patient';
+    }
+
+    // Use the user's actual role for the breadcrumb, not the URL path
+    const role = userRolePath || paths[0];
     const roleLabel = roleLabels[role];
     if (!roleLabel) return breadcrumbs;
 
