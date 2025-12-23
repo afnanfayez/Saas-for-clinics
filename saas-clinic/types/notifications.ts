@@ -2,8 +2,10 @@ export type NotificationStatus = "unread" | "read";
 
 export type NotificationCategory =
   | "appointment"
+  | "appointment_request"
   | "reminder"
   | "message"
+  | "today_schedule"
   | "system"
   | "other";
 
@@ -16,4 +18,6 @@ export interface NotificationItem {
   category?: NotificationCategory;
   actionLabel?: string;
   href?: string;
+  payload?: Record<string, unknown>;
+  readAt?: string | null;
 }

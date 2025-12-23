@@ -160,18 +160,29 @@ export default function NotificationBell({
               items.map((item) => {
                 const isUnread = item.status === "unread";
                 const accent =
-                  item.category === "appointment"
+                  item.category === "appointment" || item.category === "appointment_request"
                     ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20"
+                    : item.category === "today_schedule"
+                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
                     : item.category === "reminder"
                     ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20"
-                    : item.category === "message"
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
                     : "border-slate-200 dark:border-slate-700";
 
+                const handleActivate = () => onItemClick?.(item);
+                const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleActivate();
+                  }
+                };
+
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    onClick={() => onItemClick?.(item)}
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleActivate}
+                    onKeyDown={handleKeyDown}
                     className={`w-full text-left px-4 py-3 flex gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors ${
                       isUnread ? "bg-slate-50/80 dark:bg-slate-900/50" : ""
                     }`}
@@ -196,14 +207,22 @@ export default function NotificationBell({
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                         <span>{formatTimeFromNow(item.createdAt, isArabic)}</span>
-                        {item.actionLabel && (
-                          <span className="text-teal-700 dark:text-teal-300 font-medium">
-                            {item.actionLabel}
+                        {item.actionLabel && item.href && (
+                          <span className="flex items-center gap-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onItemClick?.(item);
+                              }}
+                              className="text-teal-700 dark:text-teal-300 font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-teal-500 rounded px-1"
+                            >
+                              {item.actionLabel}
+                            </button>
                           </span>
                         )}
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })
             )}
