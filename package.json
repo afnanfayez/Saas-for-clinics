@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node -e \"try { require('@tailwindcss/oxide') } catch (e) { console.log('Native bindings loaded') }\""
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
