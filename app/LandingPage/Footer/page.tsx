@@ -30,6 +30,37 @@ export default function Footer() {
           <p className="footer-copy">
             &copy; {new Date().getFullYear()} {t.yourClinic}. {t.rightsReserved}
           </p>
+          <div className="footer-creators">
+            <span className="creators-label">
+              {language === 'en' ? 'Created by:' : 'تم التطوير بواسطة:'}
+            </span>
+            <a 
+              href="https://www.linkedin.com/in/yasser-hegazy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="creator-link"
+            >
+              Yasser Hegazy
+            </a>
+            <span className="separator">•</span>
+            <a 
+              href="https://www.linkedin.com/in/afnan-alzeiti-27570a252/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="creator-link"
+            >
+              Afnan Alzeity
+            </a>
+            <span className="separator">•</span>
+            <a 
+              href="https://www.linkedin.com/in/noor-al-afifi-168483399/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="creator-link"
+            >
+              Noor Al-Afifi
+            </a>
+          </div>
         </div>
 
         <div className="footer-links">

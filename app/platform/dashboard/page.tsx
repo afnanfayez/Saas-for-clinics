@@ -9,6 +9,7 @@ import StatCard from '@/components/StatCard';
 import RevenueChart from '@/components/RevenueChart';
 import ClinicGrowthChart from '@/components/ClinicGrowthChart';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import apiClient from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useRoleGuard } from '@/lib/roleGuard';
@@ -66,24 +67,19 @@ export default function PlatformDashboard() {
       if (!token) return;
       
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/admin/dashboard/stats', {
+        const response = await apiClient.get('/admin/dashboard/stats', {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
           },
         });
 
-        if (!response.ok) {
-          console.error('Failed to fetch admin stats:', response.status);
-          return;
-        }
-
-        const data = await response.json();
+        const data = response.data;
         // Backend returns { success, message, data: {...stats} }
         const statsPayload = (data as any)?.data ?? data;
         setStats(statsPayload);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
+      } catch (error: any) {
+        const status = error?.response?.status;
+        console.error('Failed to fetch admin stats:', status ?? error);
       } finally {
         setLoadingStats(false);
       }

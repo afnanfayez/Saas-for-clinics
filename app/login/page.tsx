@@ -112,8 +112,21 @@ export default function LoginPage() {
           <LanguageSwitcher />
         </div>
 
+        {/* Back to Home Button */}
+        <div className="mb-4 mt-16">
+          <a 
+            href="/" 
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-teal-600 dark:hover:text-teal-400 transition-all shadow-sm hover:shadow-md"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {language === 'en' ? 'Back to Home' : 'العودة للرئيسية'}
+          </a>
+        </div>
+
         {/* Login Card */}
-        <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-2xl overflow-hidden mt-16 transition-colors duration-300">
+        <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-2xl overflow-hidden transition-colors duration-300">
           {/* Header with Healthcare Colors */}
           <div className="bg-linear-to-r from-teal-600 to-cyan-600 px-8 py-10 text-white text-center relative">
             {/* Decorative elements */}
@@ -271,17 +284,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Info Box */}
-        <div className="mt-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 shadow-md transition-colors">
-          <h3 className="font-semibold text-gray-800 dark:text-white mb-2 text-sm">
-            {t.demoCredentials}
-          </h3>
-          <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-            <p><strong>{t.admin}</strong> admin@platform.com</p>
-            <p><strong>{t.manager}</strong> manager@clinic.ps</p>
-            <p><strong>{t.doctorLabel}</strong> doctor@clinic.ps</p>
-          </div>
-        </div>
+        
       </div>
     </div>
   );
